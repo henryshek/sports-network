@@ -92,7 +92,7 @@ export default function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentPage === 'home' && <Home user={user} onNavigate={setPageWrapper} />}
+        {currentPage === 'home' && <Home user={user} />}
         {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} />}
         {currentPage === 'event-detail' && selectedEventId && (
           <EventDetail
