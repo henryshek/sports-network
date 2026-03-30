@@ -1,9 +1,25 @@
 import { useState } from 'react'
-import { authApi } from '@/api'
 import { User } from '@/types'
 
 interface LoginProps {
   onLoginSuccess: (user: User) => void
+}
+
+// Mock users database
+const mockUsers: Record<string, { password: string; user: User }> = {
+  'john@example.com': {
+    password: 'password123',
+    user: {
+      id: 'user1',
+      name: 'John Doe',
+      email: 'john@example.com',
+      avatar: '👨‍🦰',
+      bio: 'Basketball enthusiast',
+      sports: ['basketball', 'tennis'],
+      location: 'San Francisco, CA',
+      joinedDate: '2024-01-15',
+    },
+  },
 }
 
 export default function Login({ onLoginSuccess }: LoginProps) {
@@ -20,18 +36,92 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setLoading(true)
 
     try {
-      let response
       if (isSignUp) {
-        response = await authApi.register(name, email, password)
+        // Sign up - create new user
+        if (!name.trim()) {
+          setError('Please enter your name')
+          setLoading(false)
+          return
+        }
+        if (!email.trim()) {
+          setError('Please enter your email')
+          setLoading(false)
+          return
+        }
+        if (!password.trim()) {
+          setError('Please enter a password')
+          setLoading(false)
+          return
+        }
+
+        // Create new user
+        const newUser: User = {
+          id: 'user-' + Date.now(),
+          name,
+          email,
+          avatar: '👤',
+          bio: '',
+          sports: [],
+          location: '',
+          joinedDate: new Date().toISOString().split('T')[0],
+        }
+
+        // Store in mock database
+        mockUsers[email] = { password, user: newUser }
+
+        // Save to localStorage
+        localStorage.setItem('token', 'mock-token-' + Date.now())
+        localStorage.setItem('user', JSON.stringify(newUser))
+
+        // Simulate delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        onLoginSuccess(newUser)
       } else {
-        response = await authApi.login(email, password)
+        // Login
+        if (!email.trim()) {
+          setError('Please enter your email')
+          setLoading(false)
+          return
+        }
+        if (!password.trim()) {
+          setError('Please enter your password')
+          setLoading(false)
+          return
+        }
+
+        // Check if user exists in mock database
+        const userRecord = mockUsers[email]
+        if (!userRecord) {
+          // For demo, allow any email to login
+          const demoUser: User = {
+            id: 'user-' + Date.now(),
+            name: email.split('@')[0],
+            email,
+            avatar: '👤',
+            bio: '',
+            sports: [],
+            location: '',
+            joinedDate: new Date().toISOString().split('T')[0],
+          }
+          mockUsers[email] = { password, user: demoUser }
+          localStorage.setItem('token', 'mock-token-' + Date.now())
+          localStorage.setItem('user', JSON.stringify(demoUser))
+          await new Promise(resolve => setTimeout(resolve, 500))
+          onLoginSuccess(demoUser)
+        } else if (userRecord.password === password) {
+          // Password matches
+          localStorage.setItem('token', 'mock-token-' + Date.now())
+          localStorage.setItem('user', JSON.stringify(userRecord.user))
+          await new Promise(resolve => setTimeout(resolve, 500))
+          onLoginSuccess(userRecord.user)
+        } else {
+          setError('Invalid email or password')
+        }
       }
-      
-      localStorage.setItem('token', response.data.token)
-      const userResponse = await authApi.getCurrentUser()
-      onLoginSuccess(userResponse.data)
     } catch (err: any) {
-      setError(err.response?.data?.message || 'An error occurred')
+      console.error('Auth error:', err)
+      setError(err.message || 'An error occurred')
     } finally {
       setLoading(false)
     }
@@ -118,6 +208,13 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               {isSignUp ? 'Login' : 'Sign Up'}
             </button>
           </p>
+        </div>
+
+        {/* Demo Info */}
+        <div className="mt-6 p-3 bg-primary/5 rounded-lg text-xs text-muted">
+          <p className="font-semibold mb-1">Demo Mode:</p>
+          <p>• Sign up with any email and password</p>
+          <p>• Or login with any credentials</p>
         </div>
       </div>
     </div>
