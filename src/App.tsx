@@ -19,7 +19,6 @@ type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'clu
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
   const [currentPage, setCurrentPage] = useState<Page>('home')
-  const setPageWrapper = (page: any) => setCurrentPage(page as Page)
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null)
   const [events, setEvents] = useState<Event[]>(mockEvents)
