@@ -19,6 +19,30 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// Mock data for demo
+const mockUsers: Record<string, User> = {
+  'user1': {
+    id: 'user1',
+    name: 'John Doe',
+    email: 'john@example.com',
+    avatar: '👨‍🦰',
+    bio: 'Basketball enthusiast',
+    sports: ['basketball', 'tennis'],
+    location: 'San Francisco, CA',
+    joinedDate: '2024-01-15',
+  },
+  'user2': {
+    id: 'user2',
+    name: 'Jane Smith',
+    email: 'jane@example.com',
+    avatar: '👩‍🦱',
+    bio: 'Soccer player',
+    sports: ['soccer', 'volleyball'],
+    location: 'San Francisco, CA',
+    joinedDate: '2024-02-20',
+  },
+}
+
 // Events
 export const eventApi = {
   getAll: () => api.get<Event[]>('/events'),
@@ -58,12 +82,46 @@ export const messageApi = {
   createGroupChat: (name: string, participantIds: string[]) => api.post('/chats/group', { name, participantIds }),
 }
 
-// Auth
+// Auth - Mock implementation for demo
 export const authApi = {
-  login: (email: string, password: string) => api.post('/auth/login', { email, password }),
-  register: (name: string, email: string, password: string) => api.post('/auth/register', { name, email, password }),
-  logout: () => api.post('/auth/logout'),
-  getCurrentUser: () => api.get<User>('/auth/me'),
+  login: async (email: string, password: string) => {
+    // Mock login - accept any email/password combination
+    const user = Object.values(mockUsers).find(u => u.email === email) || mockUsers['user1']
+    return {
+      data: {
+        token: 'mock-token-' + Date.now(),
+        user,
+      },
+    }
+  },
+  register: async (name: string, email: string, password: string) => {
+    // Mock registration - create a new user
+    const newUserId = 'user-' + Date.now()
+    const newUser: User = {
+      id: newUserId,
+      name,
+      email,
+      avatar: '👤',
+      bio: '',
+      sports: [],
+      location: '',
+      joinedDate: new Date().toISOString().split('T')[0],
+    }
+    mockUsers[newUserId] = newUser
+    return {
+      data: {
+        token: 'mock-token-' + Date.now(),
+        user: newUser,
+      },
+    }
+  },
+  logout: () => Promise.resolve(),
+  getCurrentUser: async () => {
+    // Return the first mock user
+    return {
+      data: mockUsers['user1'],
+    }
+  },
 }
 
 export default api
