@@ -3,6 +3,7 @@ import { mockEvents } from '@/mockData'
 import { Event } from '@/types'
 import { LeafletMap } from '@/components/LeafletMap'
 import { EventMapFilters, type EventFilters } from '@/components/EventMapFilters'
+import { TOP_SPORTS, isTopSport } from '@/constants/sports'
 
 interface MapViewProps {
   onSelectEvent: (eventId: string) => void
@@ -68,7 +69,18 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
 
   const filteredEvents = events.filter(event => {
     // Sport type filter
-    if (filters.sportType.length > 0 && !filters.sportType.includes(event.sportType)) {
+    if (filters.sportType.length > 0) {
+      const sportMatches = filters.sportType.includes(event.sportType)
+      const othersSelected = filters.sportType.includes('others')
+      const isCustomSport = !isTopSport(event.sportType)
+      
+      if (!sportMatches && !(othersSelected && isCustomSport)) {
+        return false
+      }
+    }
+    
+    // Custom sport filter
+    if (filters.customSport && event.sportType !== filters.customSport) {
       return false
     }
 
@@ -121,6 +133,7 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
   })
 
   const getSportEmoji = (sport: string) => {
+    if (sport === 'others') return '🏅'
     const emojis: Record<string, string> = {
       basketball: '🏀',
       soccer: '⚽',
@@ -128,13 +141,18 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
       volleyball: '🏐',
       badminton: '🏸',
       cricket: '🏏',
-      baseball: '⚾',
       running: '🏃',
       cycling: '🚴',
       swimming: '🏊',
+      yoga: '🧘',
     }
-    return emojis[sport] || '⚽'
+    return emojis[sport.toLowerCase()] || '⚽'
   }
+
+  const topSports = TOP_SPORTS.map(s => s.toLowerCase())
+  const allSports = Array.from(new Set(events.map(e => e.sportType)))
+  const customSports = allSports.filter(s => !isTopSport(s))
+  const hasCustomSports = customSports.length > 0
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event)
@@ -178,6 +196,49 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
           ✓ Showing events happening today within 10 km of your location
         </div>
       )}
+
+      {/* Sport Filter Buttons */}
+      <div className="mb-4 flex gap-2 flex-wrap overflow-x-auto pb-2">
+        <button
+          onClick={() => setFilters({ ...filters, sportType: [] })}
+          className={`px-4 py-2 rounded-full transition whitespace-nowrap font-semibold ${
+            filters.sportType.length === 0 ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
+          }`}
+        >
+          All Sports
+        </button>
+        {topSports.map(sport => (
+          <button
+            key={sport}
+            onClick={() => {
+              const updated = filters.sportType.includes(sport)
+                ? filters.sportType.filter(s => s !== sport)
+                : [...filters.sportType, sport]
+              setFilters({ ...filters, sportType: updated })
+            }}
+            className={`px-4 py-2 rounded-full transition capitalize whitespace-nowrap ${
+              filters.sportType.includes(sport) ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
+            }`}
+          >
+            {getSportEmoji(sport)} {sport}
+          </button>
+        ))}
+        {hasCustomSports && (
+          <button
+            onClick={() => {
+              const updated = filters.sportType.includes('others')
+                ? filters.sportType.filter(s => s !== 'others')
+                : [...filters.sportType, 'others']
+              setFilters({ ...filters, sportType: updated })
+            }}
+            className={`px-4 py-2 rounded-full transition whitespace-nowrap ${
+              filters.sportType.includes('others') ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
+            }`}
+          >
+            🏅 Others ({customSports.length})
+          </button>
+        )}
+      </div>
 
       {/* Filters */}
       <EventMapFilters onFiltersChange={setFilters} />

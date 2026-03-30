@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { mockEvents } from '@/mockData'
 import { Event } from '@/types'
 import { EventMiniMap } from '@/components/EventMiniMap'
+import { TOP_SPORTS, isTopSport } from '@/constants/sports'
 
 interface EventsProps {
   onSelectEvent: (eventId: string) => void
@@ -13,14 +14,25 @@ export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
   const [selectedSport, setSelectedSport] = useState<string>('')
   const [events] = useState<Event[]>(mockEvents)
 
-  const sports = Array.from(new Set(events.map(e => e.sportType)))
+  const topSports = TOP_SPORTS.map(s => s.toLowerCase())
+  const allSports = Array.from(new Set(events.map(e => e.sportType)))
+  const customSports = allSports.filter(s => !isTopSport(s))
+  const hasCustomSports = customSports.length > 0
 
   const filteredEvents = events.filter(event => {
     const matchesSearch =
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       event.location.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesSport = !selectedSport || event.sportType === selectedSport
+    
+    let matchesSport = true
+    if (selectedSport) {
+      if (selectedSport === 'others') {
+        matchesSport = !isTopSport(event.sportType)
+      } else {
+        matchesSport = event.sportType === selectedSport
+      }
+    }
 
     return matchesSearch && matchesSport
   })
@@ -30,6 +42,7 @@ export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
   }
 
   const getSportEmoji = (sport: string) => {
+    if (sport === 'others') return '🏅'
     const emojis: Record<string, string> = {
       basketball: '🏀',
       soccer: '⚽',
@@ -67,26 +80,36 @@ export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
           className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         />
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap overflow-x-auto pb-2">
           <button
             onClick={() => setSelectedSport('')}
-            className={`px-4 py-2 rounded-lg transition ${
+            className={`px-4 py-2 rounded-full transition whitespace-nowrap font-semibold ${
               !selectedSport ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
             }`}
           >
             All Sports
           </button>
-          {sports.map(sport => (
+          {topSports.map(sport => (
             <button
               key={sport}
               onClick={() => setSelectedSport(sport)}
-              className={`px-4 py-2 rounded-lg transition capitalize ${
+              className={`px-4 py-2 rounded-full transition capitalize whitespace-nowrap ${
                 selectedSport === sport ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
               }`}
             >
               {getSportEmoji(sport)} {sport}
             </button>
           ))}
+          {hasCustomSports && (
+            <button
+              onClick={() => setSelectedSport('others')}
+              className={`px-4 py-2 rounded-full transition whitespace-nowrap ${
+                selectedSport === 'others' ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
+              }`}
+            >
+              + Others ({customSports.length})
+            </button>
+          )}
         </div>
       </div>
 
