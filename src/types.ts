@@ -83,6 +83,7 @@ export interface Club {
   events?: Event[]
   announcements?: Announcement[]
   invitations?: Invitation[]
+  membershipRequests?: ClubMembershipRequest[] // Pending join requests
 }
 
 export interface Announcement {
@@ -102,6 +103,17 @@ export interface Invitation {
   userId: string
   status: 'pending' | 'accepted' | 'rejected'
   createdAt: string
+}
+
+export interface ClubMembershipRequest {
+  id: string
+  clubId: string
+  userId: string
+  userName: string
+  status: 'pending' | 'approved' | 'rejected'
+  requestedAt: string
+  respondedAt?: string
+  respondedBy?: string
 }
 
 export interface Chat {

@@ -24,6 +24,8 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
   const [customSportName, setCustomSportName] = useState('')
   const [clubPhoto, setClubPhoto] = useState<string>('')
   const [backgroundPhoto, setBackgroundPhoto] = useState<string>('')
+  const [userClubs] = useState<string[]>(['club1'])
+  const [joinRequests, setJoinRequests] = useState<Record<string, string>>({})
 
   const topSports = TOP_SPORTS.map(s => s.toLowerCase())
 
@@ -65,6 +67,19 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       reader.readAsDataURL(file)
     }
   }
+
+  const handleJoinClub = (clubId: string, clubName: string) => {
+    if (joinRequests[clubId]) {
+      alert('You have already requested to join this club')
+      return
+    }
+    
+    const requestId = `req_${Date.now()}`
+    setJoinRequests({ ...joinRequests, [clubId]: requestId })
+    alert(`Join request sent to ${clubName} admins. Waiting for approval...`)
+  }
+
+
 
   const getSportEmoji = (sport: string) => {
     const emojis: Record<string, string> = {
@@ -244,12 +259,32 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
                 >
                   View Club
                 </button>
-                <button
-                  onClick={() => onSelectClub(club.id)}
-                  className="flex-1 bg-surface text-primary py-2 rounded-lg hover:bg-border transition font-semibold text-sm border border-primary"
-                >
-                  Join
-                </button>
+                {userClubs.includes(club.id) ? (
+                  <button
+                    onClick={() => {
+                      if (onCreateGroupChat) {
+                        onCreateGroupChat(club.name)
+                      }
+                    }}
+                    className="flex-1 bg-success text-white py-2 rounded-lg hover:opacity-90 transition font-semibold text-sm"
+                  >
+                    💬 Chat
+                  </button>
+                ) : joinRequests[club.id] ? (
+                  <button
+                    disabled
+                    className="flex-1 bg-border text-muted py-2 rounded-lg font-semibold text-sm cursor-not-allowed"
+                  >
+                    Pending
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleJoinClub(club.id, club.name)}
+                    className="flex-1 bg-surface text-primary py-2 rounded-lg hover:bg-border transition font-semibold text-sm border border-primary"
+                  >
+                    Join
+                  </button>
+                )}
               </div>
             </div>
           ))
