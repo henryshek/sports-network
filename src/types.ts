@@ -26,6 +26,7 @@ export interface User {
   name: string
   email: string
   avatar?: string
+  profilePicture?: string // User's profile picture URL
   bio?: string
   sports?: SportType[]
   sportInterests?: SportType[]
@@ -75,6 +76,8 @@ export interface Club {
   members: string[]
   admins: string[]
   isPrivate: boolean
+  clubPhoto?: string // Club photo/icon URL
+  backgroundPhoto?: string // Club background photo URL
   createdAt: string
   updatedAt: string
   events?: Event[]

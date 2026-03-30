@@ -22,6 +22,8 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
   })
   const [showCustomSport, setShowCustomSport] = useState(false)
   const [customSportName, setCustomSportName] = useState('')
+  const [clubPhoto, setClubPhoto] = useState<string>('')
+  const [backgroundPhoto, setBackgroundPhoto] = useState<string>('')
 
   const topSports = TOP_SPORTS.map(s => s.toLowerCase())
 
@@ -41,6 +43,28 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
     
     return matchesSearch && matchesSport
   })
+
+  const handleClubPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setClubPhoto(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleBackgroundPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setBackgroundPhoto(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const getSportEmoji = (sport: string) => {
     const emojis: Record<string, string> = {
@@ -74,6 +98,8 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       description: formData.description,
       sport: clubSport as any,
       isPrivate: formData.isPrivate,
+      clubPhoto: clubPhoto,
+      backgroundPhoto: backgroundPhoto,
       members: ['user1'],
       admins: ['user1'],
       creator: {
@@ -102,6 +128,8 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
     setFormData({ name: '', description: '', sport: 'basketball', isPrivate: false })
     setShowCustomSport(false)
     setCustomSportName('')
+    setClubPhoto('')
+    setBackgroundPhoto('')
     setShowCreateModal(false)
     alert(`Club created successfully! Group chat "${formData.name}" has been created.`)
   }
@@ -168,9 +196,23 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
               key={club.id}
               className="bg-white rounded-lg border border-border overflow-hidden hover:shadow-lg transition"
             >
-              {/* Header */}
-              <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-6 h-32 flex items-end">
-                <span className="text-4xl">{getSportEmoji(club.sport)}</span>
+              {/* Header with Background Photo */}
+              <div
+                className="bg-gradient-to-r from-primary/20 to-primary/10 p-6 h-32 flex items-end bg-cover bg-center relative"
+                style={club.backgroundPhoto ? { backgroundImage: `url(${club.backgroundPhoto})` } : {}}
+              >
+                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="relative z-10 flex items-center gap-3">
+                  {club.clubPhoto ? (
+                    <img
+                      src={club.clubPhoto}
+                      alt={club.name}
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white"
+                    />
+                  ) : (
+                    <span className="text-4xl">{getSportEmoji(club.sport)}</span>
+                  )}
+                </div>
               </div>
 
               {/* Content */}
@@ -286,6 +328,36 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
                   />
                 </div>
               )}
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Club Photo</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleClubPhotoChange}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                {clubPhoto && (
+                  <div className="mt-2 w-16 h-16 rounded-full overflow-hidden border-2 border-primary">
+                    <img src={clubPhoto} alt="Club" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Background Photo</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBackgroundPhotoChange}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                {backgroundPhoto && (
+                  <div className="mt-2 w-full h-20 rounded-lg overflow-hidden border-2 border-primary">
+                    <img src={backgroundPhoto} alt="Background" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
 
               <div className="flex items-center gap-2">
                 <input
