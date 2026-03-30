@@ -95,6 +95,20 @@ export default function EventDetail({ eventId, onBack }: EventDetailProps) {
     alert('Spot reserved successfully!')
   }
 
+  const handleCancelReserve = (participantId: string) => {
+    if (confirm('Are you sure you want to cancel this reservation?')) {
+      setEvent({
+        ...event,
+        currentParticipants: Math.max(0, event.currentParticipants - 1),
+        participants: event.participants.filter(p => p !== participantId),
+        reservedGuests: Array.isArray(event.reservedGuests)
+          ? event.reservedGuests.filter(g => (typeof g === 'string' ? g : g.id) !== participantId)
+          : [],
+      })
+      alert('Reservation cancelled!')
+    }
+  }
+
   const handleViewProfile = (userId: string) => {
     const user = mockUsers[userId as keyof typeof mockUsers]
     if (user) {
@@ -255,6 +269,36 @@ export default function EventDetail({ eventId, onBack }: EventDetailProps) {
           )}
         </div>
       </div>
+
+      {/* Reserved Guests */}
+      {event.reservedGuests && event.reservedGuests.length > 0 && (
+        <div className="bg-white rounded-lg border border-border p-6 mb-6">
+          <h2 className="text-xl font-semibold text-foreground mb-4">Reserved Spots ({event.reservedGuests.length})</h2>
+          <div className="space-y-3">
+            {event.reservedGuests.map((guest, i) => {
+              const guestId = typeof guest === 'string' ? guest : guest.id
+              const guestName = typeof guest === 'string' ? 'User' : guest.name
+              const user = mockUsers[guestId as keyof typeof mockUsers]
+              return (
+                <div key={i} className="flex items-center justify-between p-3 bg-surface rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-warning text-white flex items-center justify-center text-xs font-bold">
+                      {user?.avatar || '🎫'}
+                    </div>
+                    <p className="text-sm text-foreground">{user?.name || guestName}</p>
+                  </div>
+                  <button
+                    onClick={() => handleCancelReserve(guestId)}
+                    className="text-xs px-3 py-1 bg-error text-white rounded hover:opacity-90 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Waitlist */}
       {event.waitlist && event.waitlist.length > 0 && (

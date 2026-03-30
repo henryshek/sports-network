@@ -4,13 +4,14 @@ import Login from './pages/Login'
 import Home from './pages/Home'
 import Events from './pages/Events'
 import EventDetail from './pages/EventDetail'
+import CreateEvent from './pages/CreateEvent'
 import Clubs from './pages/Clubs'
 import ClubDetail from './pages/ClubDetail'
 import Messages from './pages/Messages'
 import Profile from './pages/Profile'
 import { LogOut, Home as HomeIcon, Calendar, Users, MessageSquare, User as UserIcon } from 'lucide-react'
 
-type Page = 'home' | 'events' | 'event-detail' | 'clubs' | 'club-detail' | 'messages' | 'profile'
+type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'club-detail' | 'messages' | 'profile'
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
@@ -84,9 +85,12 @@ export default function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {currentPage === 'home' && <Home user={user} onNavigate={setPageWrapper} />}
-        {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} />}
+        {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} />}
         {currentPage === 'event-detail' && selectedEventId && (
           <EventDetail eventId={selectedEventId} user={user} onBack={() => setCurrentPage('events')} />
+        )}
+        {currentPage === 'create-event' && (
+          <CreateEvent onBack={() => setCurrentPage('events')} user={user} />
         )}
         {currentPage === 'clubs' && <Clubs onSelectClub={navigateToClubDetail} />}
         {currentPage === 'club-detail' && selectedClubId && (

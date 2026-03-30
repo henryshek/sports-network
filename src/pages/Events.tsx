@@ -4,9 +4,10 @@ import { Event } from '@/types'
 
 interface EventsProps {
   onSelectEvent: (eventId: string) => void
+  onCreateEvent?: () => void
 }
 
-export default function Events({ onSelectEvent }: EventsProps) {
+export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSport, setSelectedSport] = useState<string>('')
   const [events] = useState<Event[]>(mockEvents)
@@ -47,7 +48,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Events</h1>
-        <button className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
+        <button onClick={onCreateEvent} className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
           + Create Event
         </button>
       </div>
@@ -112,6 +113,35 @@ export default function Events({ onSelectEvent }: EventsProps) {
                 <div>
                   <p className="text-xs text-muted">Skill Level</p>
                   <p className="text-sm font-medium text-foreground capitalize">{event.skillLevel}</p>
+                </div>
+              </div>
+
+              {/* Participants Preview */}
+              <div className="mb-4 pb-4 border-b border-border">
+                <p className="text-xs text-muted mb-2">Participants ({event.currentParticipants})</p>
+                <div className="flex flex-wrap gap-2">
+                  {event.participants.slice(0, 5).map((participantId, i) => {
+                    const mockUsersMap: Record<string, any> = {
+                      'user1': { name: 'John Doe', avatar: '👨‍🦰' },
+                      'user2': { name: 'Jane Smith', avatar: '👩‍🦱' },
+                      'user3': { name: 'Mike Johnson', avatar: '👨‍💼' },
+                      'user4': { name: 'Sarah Williams', avatar: '👩‍🦳' },
+                      'user5': { name: 'Alex Brown', avatar: '👨‍🎓' },
+                      'user6': { name: 'Emma Davis', avatar: '👩‍🎨' },
+                    }
+                    const user = mockUsersMap[participantId as keyof typeof mockUsersMap]
+                    return (
+                      <div key={i} className="flex items-center gap-1 bg-surface px-2 py-1 rounded-full text-xs">
+                        <span>{user?.avatar || '👤'}</span>
+                        <span className="text-foreground">{user?.name?.split(' ')[0] || 'User'}</span>
+                      </div>
+                    )
+                  })}
+                  {event.currentParticipants > 5 && (
+                    <div className="flex items-center gap-1 bg-surface px-2 py-1 rounded-full text-xs text-muted">
+                      +{event.currentParticipants - 5} more
+                    </div>
+                  )}
                 </div>
               </div>
 
