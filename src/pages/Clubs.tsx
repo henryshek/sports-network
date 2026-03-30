@@ -10,7 +10,14 @@ interface ClubsProps {
 export default function Clubs({ onSelectClub }: ClubsProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSport, setSelectedSport] = useState<string>('')
-  const [clubs] = useState<Club[]>(mockClubs)
+  const [clubs, setClubs] = useState<Club[]>(mockClubs)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    sport: 'basketball',
+    isPrivate: false,
+  })
 
   const sports = Array.from(new Set(clubs.map(c => c.sport)))
 
@@ -38,12 +45,52 @@ export default function Clubs({ onSelectClub }: ClubsProps) {
     return emojis[sport] || '⚽'
   }
 
+  const handleCreateClub = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formData.name || !formData.description) {
+      alert('Please fill in all fields')
+      return
+    }
+
+    const newClub: Club = {
+      id: `club_${Date.now()}`,
+      name: formData.name,
+      description: formData.description,
+      sport: formData.sport as any,
+      isPrivate: formData.isPrivate,
+      members: ['user1'],
+      admins: ['user1'],
+      creator: {
+        id: 'user1',
+        name: 'You',
+        email: 'you@example.com',
+        avatar: '👤',
+        bio: 'Club creator',
+        sports: [],
+        location: '',
+        joinedDate: new Date().toISOString(),
+      },
+      events: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      creatorId: 'user1',
+    }
+
+    setClubs([...clubs, newClub])
+    setFormData({ name: '', description: '', sport: 'basketball', isPrivate: false })
+    setShowCreateModal(false)
+    alert('Club created successfully!')
+  }
+
   return (
     <div className="space-y-6 pb-24">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Clubs</h1>
-        <button className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+        >
           + Create Club
         </button>
       </div>
@@ -106,11 +153,11 @@ export default function Clubs({ onSelectClub }: ClubsProps) {
                     <span>👥</span>
                     <span>{club.members.length} members</span>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    club.isPrivate
-                      ? 'bg-warning/10 text-warning'
-                      : 'bg-success/10 text-success'
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      club.isPrivate ? 'bg-warning/10 text-warning' : 'bg-success/10 text-success'
+                    }`}
+                  >
                     {club.isPrivate ? 'Private' : 'Public'}
                   </span>
                 </div>
@@ -123,6 +170,83 @@ export default function Clubs({ onSelectClub }: ClubsProps) {
           </div>
         )}
       </div>
+
+      {/* Create Club Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-8">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Create Club</h2>
+
+            <form onSubmit={handleCreateClub} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Club Name *</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="e.g., Basketball Enthusiasts"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Description *</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  placeholder="Describe your club..."
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Sport</label>
+                <select
+                  value={formData.sport}
+                  onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
+                  className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  {sports.map(sport => (
+                    <option key={sport} value={sport}>
+                      {sport.charAt(0).toUpperCase() + sport.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="private"
+                  checked={formData.isPrivate}
+                  onChange={(e) => setFormData({ ...formData, isPrivate: e.target.checked })}
+                  className="w-4 h-4 rounded border-border"
+                />
+                <label htmlFor="private" className="text-sm text-foreground">
+                  Make this club private
+                </label>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1 px-4 py-2 border border-border rounded-lg text-foreground hover:bg-surface transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition"
+                >
+                  Create Club
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

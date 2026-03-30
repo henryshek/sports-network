@@ -4,6 +4,7 @@ import { User } from '@/types'
 interface CreateEventProps {
   onBack: () => void
   user?: User
+  onEventCreated?: (event: any) => void
 }
 
 export default function CreateEvent({ onBack }: CreateEventProps) {
@@ -24,7 +25,6 @@ export default function CreateEvent({ onBack }: CreateEventProps) {
       alert('Please fill in all required fields')
       return
     }
-    console.log('Event created:', formData)
     alert('Event created successfully!')
     onBack()
   }

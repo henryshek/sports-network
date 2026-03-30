@@ -1,160 +1,328 @@
-import { useState, useEffect } from 'react'
-import { Send, Plus } from 'lucide-react'
-import { Chat, User } from '@/types'
-import { messageApi } from '@/api'
+import { useState } from 'react'
+import { mockUsers } from '@/mockData'
+import { User } from '@/types'
 
-interface MessagesProps {
-  user: User
+interface Message {
+  id: string
+  senderId: string
+  text: string
+  timestamp: string
 }
 
-export default function Messages({ user }: MessagesProps) {
-  const [chats, setChats] = useState<Chat[]>([])
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
+interface ChatRoom {
+  id: string
+  participantId: string
+  participantName: string
+  messages: Message[]
+  lastMessage?: string
+}
+
+interface MessagesProps {
+  user?: User
+}
+
+export default function Messages({}: MessagesProps) {
+  const [chats, setChats] = useState<ChatRoom[]>([
+    {
+      id: 'chat_1',
+      participantId: 'user2',
+      participantName: 'Alice Johnson',
+      messages: [
+        { id: '1', senderId: 'user2', text: 'Hey! Want to play basketball?', timestamp: '10:30 AM' },
+        { id: '2', senderId: 'user1', text: 'Sure! When?', timestamp: '10:32 AM' },
+        { id: '3', senderId: 'user2', text: 'Tomorrow at 6 PM at the park', timestamp: '10:33 AM' },
+      ],
+      lastMessage: 'Tomorrow at 6 PM at the park',
+    },
+    {
+      id: 'chat_2',
+      participantId: 'user3',
+      participantName: 'Bob Smith',
+      messages: [
+        { id: '1', senderId: 'user3', text: 'Are you coming to the tennis match?', timestamp: '9:15 AM' },
+        { id: '2', senderId: 'user1', text: 'Yes, I will be there!', timestamp: '9:20 AM' },
+      ],
+      lastMessage: 'Yes, I will be there!',
+    },
+  ])
+
+  const [selectedChat, setSelectedChat] = useState<ChatRoom | null>(chats[0])
   const [messageText, setMessageText] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [showNewChat, setShowNewChat] = useState(false)
 
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        const response = await messageApi.getChats()
-        setChats(response.data)
-        if (response.data.length > 0) {
-          setSelectedChat(response.data[0])
-        }
-      } catch (error) {
-        console.error('Failed to fetch chats:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchChats()
-  }, [])
-
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedChat || !messageText.trim()) return
 
-    try {
-      await messageApi.sendMessage(selectedChat.id, messageText)
-      setMessageText('')
-      // Refresh chat
-      const response = await messageApi.getChat(selectedChat.id)
-      setSelectedChat(response.data)
-    } catch (error) {
-      console.error('Failed to send message:', error)
+    const newMessage: Message = {
+      id: `msg_${Date.now()}`,
+      senderId: 'user1',
+      text: messageText,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     }
+
+    const updatedChat = {
+      ...selectedChat,
+      messages: [...selectedChat.messages, newMessage],
+      lastMessage: messageText,
+    }
+
+    setChats(chats.map(c => (c.id === selectedChat.id ? updatedChat : c)))
+    setSelectedChat(updatedChat)
+    setMessageText('')
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-muted">Loading messages...</p>
-      </div>
-    )
+  const handleStartNewChat = (userId: string) => {
+    const user = mockUsers[userId as keyof typeof mockUsers]
+    if (!user) return
+
+    const existingChat = chats.find(c => c.participantId === userId)
+    if (existingChat) {
+      setSelectedChat(existingChat)
+      setShowNewChat(false)
+      return
+    }
+
+    const newChat: ChatRoom = {
+      id: `chat_${Date.now()}`,
+      participantId: userId,
+      participantName: user.name,
+      messages: [],
+    }
+
+    setChats([...chats, newChat])
+    setSelectedChat(newChat)
+    setShowNewChat(false)
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto h-screen flex">
-        {/* Chat List */}
-        <div className="w-full md:w-80 bg-surface border-r border-border flex flex-col">
-          <div className="p-4 border-b border-border flex justify-between items-center">
-            <h2 className="text-xl font-bold text-foreground">Messages</h2>
-            <button className="p-2 hover:bg-background rounded-lg transition">
-              <Plus size={20} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto">
-            {chats.length === 0 ? (
-              <div className="p-4 text-center text-muted">
-                <p>No conversations yet</p>
-              </div>
-            ) : (
-              chats.map(chat => (
-                <button
-                  key={chat.id}
-                  onClick={() => setSelectedChat(chat)}
-                  className={`w-full p-4 border-b border-border text-left transition ${
-                    selectedChat?.id === chat.id
-                      ? 'bg-primary/10 border-l-4 border-l-primary'
-                      : 'hover:bg-background'
-                  }`}
-                >
-                  <p className="font-semibold text-foreground">{chat.name || 'Direct Message'}</p>
-                  <p className="text-sm text-muted truncate">
-                    {chat.messages[chat.messages.length - 1]?.content || 'No messages yet'}
-                  </p>
-                </button>
-              ))
-            )}
-          </div>
+    <div className="flex h-screen bg-background pb-24 md:pb-0">
+      {/* Chat List */}
+      <div className="w-full md:w-80 border-r border-border bg-surface flex flex-col">
+        <div className="p-4 border-b border-border flex items-center justify-between">
+          <h2 className="text-xl font-bold text-foreground">Messages</h2>
+          <button
+            onClick={() => setShowNewChat(!showNewChat)}
+            className="p-2 hover:bg-background rounded-lg transition"
+          >
+            ✏️
+          </button>
         </div>
 
-        {/* Chat View */}
-        <div className="hidden md:flex flex-1 flex-col">
-          {selectedChat ? (
-            <>
-              {/* Chat Header */}
-              <div className="p-4 border-b border-border bg-surface">
-                <h3 className="text-lg font-semibold text-foreground">{selectedChat.name || 'Direct Message'}</h3>
-                <p className="text-sm text-muted">{selectedChat.participants.length} participants</p>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {selectedChat.messages.length === 0 ? (
-                  <div className="text-center text-muted py-8">
-                    <p>No messages yet. Start the conversation!</p>
-                  </div>
-                ) : (
-                  selectedChat.messages.map((msg, i) => (
-                    <div
-                      key={i}
-                      className={`flex ${msg.senderId === user.id ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-xs px-4 py-2 rounded-lg ${
-                          msg.senderId === user.id
-                            ? 'bg-primary text-white'
-                            : 'bg-surface border border-border text-foreground'
-                        }`}
-                      >
-                        <p className="text-sm">{msg.content}</p>
-                        <p className={`text-xs mt-1 ${msg.senderId === user.id ? 'text-white/70' : 'text-muted'}`}>
-                          {new Date(msg.createdAt).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Message Input */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-border bg-surface">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
+        {/* New Chat Modal */}
+        {showNewChat && (
+          <div className="p-4 border-b border-border bg-background">
+            <h3 className="font-semibold text-foreground mb-3">Start a conversation</h3>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {Object.entries(mockUsers)
+                .filter(([id]) => id !== 'user1')
+                .map(([userId, userData]) => (
                   <button
-                    type="submit"
-                    className="bg-primary text-white p-2 rounded-lg hover:opacity-90 transition"
+                    key={userId}
+                    onClick={() => handleStartNewChat(userId)}
+                    className="w-full text-left p-3 hover:bg-surface rounded-lg transition"
                   >
-                    <Send size={20} />
+                    <p className="font-medium text-foreground">{userData.name}</p>
+                    <p className="text-sm text-muted">{userData.sports?.join(', ') || 'Athlete'}</p>
                   </button>
-                </div>
-              </form>
-            </>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* Chat List */}
+        <div className="flex-1 overflow-y-auto">
+          {chats.length > 0 ? (
+            chats.map(chat => (
+              <button
+                key={chat.id}
+                onClick={() => setSelectedChat(chat)}
+                className={`w-full text-left p-4 border-b border-border hover:bg-background transition ${
+                  selectedChat?.id === chat.id ? 'bg-background' : ''
+                }`}
+              >
+                <p className="font-semibold text-foreground">{chat.participantName}</p>
+                <p className="text-sm text-muted line-clamp-1">{chat.lastMessage || 'No messages yet'}</p>
+              </button>
+            ))
           ) : (
-            <div className="flex-1 flex items-center justify-center text-muted">
-              <p>Select a conversation to start messaging</p>
+            <div className="p-4 text-center text-muted">
+              <p>No conversations yet</p>
+              <button
+                onClick={() => setShowNewChat(true)}
+                className="mt-2 text-primary hover:underline text-sm"
+              >
+                Start a conversation
+              </button>
             </div>
           )}
         </div>
+      </div>
+
+      {/* Chat Window */}
+      <div className="hidden md:flex flex-1 flex-col">
+        {selectedChat ? (
+          <>
+            {/* Header */}
+            <div className="p-4 border-b border-border bg-surface flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+                {selectedChat.participantName[0]}
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">{selectedChat.participantName}</p>
+                <p className="text-xs text-muted">Online</p>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {selectedChat.messages.map(msg => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.senderId === 'user1' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-xs px-4 py-2 rounded-lg ${
+                      msg.senderId === 'user1'
+                        ? 'bg-primary text-white'
+                        : 'bg-surface text-foreground border border-border'
+                    }`}
+                  >
+                    <p className="text-sm">{msg.text}</p>
+                    <p className={`text-xs mt-1 ${msg.senderId === 'user1' ? 'text-white/70' : 'text-muted'}`}>
+                      {msg.timestamp}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Input */}
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-border bg-surface flex gap-2">
+              <input
+                type="text"
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button
+                type="submit"
+                className="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition"
+              >
+                Send
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-muted">
+            <p>Select a conversation to start messaging</p>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Chat View */}
+      <div className="md:hidden flex-1 flex flex-col">
+        {selectedChat ? (
+          <>
+            {/* Header */}
+            <div className="p-4 border-b border-border bg-surface flex items-center gap-3">
+              <button
+                onClick={() => setSelectedChat(null)}
+                className="text-primary hover:opacity-70"
+              >
+                ← Back
+              </button>
+              <div className="flex-1">
+                <p className="font-semibold text-foreground">{selectedChat.participantName}</p>
+                <p className="text-xs text-muted">Online</p>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {selectedChat.messages.map(msg => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.senderId === 'user1' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-xs px-4 py-2 rounded-lg ${
+                      msg.senderId === 'user1'
+                        ? 'bg-primary text-white'
+                        : 'bg-surface text-foreground border border-border'
+                    }`}
+                  >
+                    <p className="text-sm">{msg.text}</p>
+                    <p className={`text-xs mt-1 ${msg.senderId === 'user1' ? 'text-white/70' : 'text-muted'}`}>
+                      {msg.timestamp}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Input */}
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-border bg-surface flex gap-2">
+              <input
+                type="text"
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition"
+              >
+                Send
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col">
+            <div className="p-4 border-b border-border bg-surface flex items-center justify-between">
+              <h2 className="text-xl font-bold text-foreground">Messages</h2>
+              <button
+                onClick={() => setShowNewChat(!showNewChat)}
+                className="p-2 hover:bg-background rounded-lg transition"
+              >
+                ✏️
+              </button>
+            </div>
+            {showNewChat && (
+              <div className="p-4 border-b border-border bg-background">
+                <h3 className="font-semibold text-foreground mb-3">Start a conversation</h3>
+                <div className="space-y-2">
+                  {Object.entries(mockUsers)
+                    .filter(([id]) => id !== 'user1')
+                    .map(([userId, userData]) => (
+                      <button
+                        key={userId}
+                        onClick={() => handleStartNewChat(userId)}
+                        className="w-full text-left p-3 hover:bg-surface rounded-lg transition"
+                      >
+                        <p className="font-medium text-foreground">{userData.name}</p>
+                        <p className="text-sm text-muted">{userData.sports?.join(', ') || 'Athlete'}</p>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+            <div className="flex-1 overflow-y-auto">
+              {chats.map(chat => (
+                <button
+                  key={chat.id}
+                  onClick={() => setSelectedChat(chat)}
+                  className="w-full text-left p-4 border-b border-border hover:bg-background transition"
+                >
+                  <p className="font-semibold text-foreground">{chat.participantName}</p>
+                  <p className="text-sm text-muted line-clamp-1">{chat.lastMessage || 'No messages yet'}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
