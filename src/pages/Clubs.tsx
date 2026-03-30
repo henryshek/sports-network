@@ -4,10 +4,11 @@ import { Club } from '@/types'
 
 interface ClubsProps {
   onSelectClub: (clubId: string) => void
+  onCreateGroupChat?: (groupName: string) => void
   user?: any
 }
 
-export default function Clubs({ onSelectClub }: ClubsProps) {
+export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSport, setSelectedSport] = useState<string>('')
   const [clubs, setClubs] = useState<Club[]>(mockClubs)
@@ -77,13 +78,19 @@ export default function Clubs({ onSelectClub }: ClubsProps) {
     }
 
     setClubs([...clubs, newClub])
+    
+    // Automatically create a group chat for the club
+    if (onCreateGroupChat) {
+      onCreateGroupChat(formData.name)
+    }
+    
     setFormData({ name: '', description: '', sport: 'basketball', isPrivate: false })
     setShowCreateModal(false)
-    alert('Club created successfully!')
+    alert(`Club created successfully! Group chat "${formData.name}" has been created.`)
   }
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-24 px-4 md:px-0">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Clubs</h1>
