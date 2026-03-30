@@ -20,7 +20,11 @@ export default function CreateEvent({ onBack }: CreateEventProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Creating event:', formData)
+    if (!formData.title || !formData.date || !formData.time || !formData.location) {
+      alert('Please fill in all required fields')
+      return
+    }
+    console.log('Event created:', formData)
     alert('Event created successfully!')
     onBack()
   }
