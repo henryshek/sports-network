@@ -7,8 +7,7 @@ interface HomeProps {
 }
 
 export default function Home({ user }: HomeProps) {
-
-
+  // Version: 2.0 - Removed Upcoming Events and Popular Clubs sections
   return (
     <div className="space-y-8 pb-20">
       {/* Welcome Section */}
