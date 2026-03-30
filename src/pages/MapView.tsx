@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { mockEvents } from '@/mockData'
 import { Event } from '@/types'
-import MobileMapView from '@/components/MobileMapView'
+import VisualMap from '@/components/VisualMap'
 
 interface MapViewProps {
   onSelectEvent: (eventId: string) => void
@@ -39,7 +39,7 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Map Area */}
         <div className="lg:col-span-2">
-          <MobileMapView
+          <VisualMap
             events={events}
             onSelectEvent={(eventId) => {
               const event = events.find(e => e.id === eventId)
