@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { mockClubs } from '@/mockData'
 import { Club } from '@/types'
+import { TOP_SPORTS } from '@/constants/sports'
 
 interface ClubsProps {
   onSelectClub: (clubId: string) => void
@@ -19,7 +20,10 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
     sport: 'basketball',
     isPrivate: false,
   })
+  const [showCustomSport, setShowCustomSport] = useState(false)
+  const [customSportName, setCustomSportName] = useState('')
 
+  const topSports = TOP_SPORTS.map(s => s.toLowerCase())
   const sports = Array.from(new Set(clubs.map(c => c.sport)))
 
   const filteredClubs = clubs.filter(club => {
@@ -38,12 +42,12 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       volleyball: '🏐',
       badminton: '🏸',
       cricket: '🏏',
-      baseball: '⚾',
       running: '🏃',
       cycling: '🚴',
       swimming: '🏊',
+      yoga: '🧘',
     }
-    return emojis[sport] || '⚽'
+    return emojis[sport.toLowerCase()] || '⚽'
   }
 
   const handleCreateClub = (e: React.FormEvent) => {
@@ -53,11 +57,12 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       return
     }
 
+    const clubSport = showCustomSport ? customSportName : formData.sport
     const newClub: Club = {
       id: `club_${Date.now()}`,
       name: formData.name,
       description: formData.description,
-      sport: formData.sport as any,
+      sport: clubSport as any,
       isPrivate: formData.isPrivate,
       members: ['user1'],
       admins: ['user1'],
@@ -85,6 +90,8 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
     }
     
     setFormData({ name: '', description: '', sport: 'basketball', isPrivate: false })
+    setShowCustomSport(false)
+    setCustomSportName('')
     setShowCreateModal(false)
     alert(`Club created successfully! Group chat "${formData.name}" has been created.`)
   }
@@ -223,19 +230,40 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Sport</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Sport (Top 10)</label>
                 <select
-                  value={formData.sport}
-                  onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
+                  value={showCustomSport ? 'custom' : formData.sport}
+                  onChange={(e) => {
+                    if (e.target.value === 'custom') {
+                      setShowCustomSport(true)
+                    } else {
+                      setShowCustomSport(false)
+                      setFormData({ ...formData, sport: e.target.value })
+                    }
+                  }}
                   className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  {sports.map(sport => (
+                  {topSports.map(sport => (
                     <option key={sport} value={sport}>
                       {sport.charAt(0).toUpperCase() + sport.slice(1)}
                     </option>
                   ))}
+                  <option value="custom">+ Others (Custom Sport)</option>
                 </select>
               </div>
+
+              {showCustomSport && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Custom Sport Name</label>
+                  <input
+                    type="text"
+                    value={customSportName}
+                    onChange={(e) => setCustomSportName(e.target.value)}
+                    placeholder="e.g., Pickleball, Squash, Climbing"
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              )}
 
               <div className="flex items-center gap-2">
                 <input

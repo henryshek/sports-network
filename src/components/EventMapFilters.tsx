@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { TOP_SPORTS } from '@/constants/sports';
 
 export interface EventFilters {
   sportType: string[];
@@ -13,17 +14,7 @@ interface EventMapFiltersProps {
   onFiltersChange: (filters: EventFilters) => void;
 }
 
-const SPORTS = [
-  'basketball', 'soccer', 'tennis', 'volleyball', 'badminton', 'cricket', 'baseball',
-  'running', 'cycling', 'swimming', 'golf', 'hockey', 'rugby', 'american football',
-  'table tennis', 'squash', 'pickleball', 'martial arts', 'boxing',
-  'wrestling', 'weightlifting', 'yoga', 'pilates', 'crossfit', 'rock climbing',
-  'skateboarding', 'surfing', 'kayaking', 'hiking', 'mountain biking', 'ice skating',
-  'roller skating', 'bowling', 'archery', 'fencing', 'gymnastics', 'parkour',
-  'dance', 'aerobics', 'zumba', 'tai chi', 'karate', 'judo', 'taekwondo',
-  'handball', 'lacrosse', 'ultimate frisbee', 'cornhole', 'paddleball', 'racquetball',
-  'badminton', 'darts', 'pool', 'billiards', 'ping pong', 'tennis'
-];
+const SPORTS = TOP_SPORTS.map(s => s.toLowerCase());
 
 const SKILL_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Professional'];
 
@@ -37,8 +28,8 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
   });
 
   const [showFilters, setShowFilters] = useState(false);
-  const [customSport, setCustomSport] = useState('');
-  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [showOthersInput, setShowOthersInput] = useState(false);
+  const [otherSport, setOtherSport] = useState('');
 
   const handleSportToggle = (sport: string) => {
     const updated = filters.sportType.includes(sport)
@@ -50,17 +41,15 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
     onFiltersChange(newFilters);
   };
 
-  const handleSkillToggle = (skill: string) => {
-    const updated = filters.skillLevel.includes(skill)
-      ? filters.skillLevel.filter(s => s !== skill)
-      : [...filters.skillLevel, skill];
+  const handleSkillToggle = (level: string) => {
+    const updated = filters.skillLevel.includes(level)
+      ? filters.skillLevel.filter(s => s !== level)
+      : [...filters.skillLevel, level];
     
     const newFilters = { ...filters, skillLevel: updated };
     setFilters(newFilters);
     onFiltersChange(newFilters);
   };
-
-
 
   const handleTimeChange = (time: 'all' | 'today' | 'week' | 'month') => {
     const newFilters = { ...filters, timeRange: time };
@@ -80,21 +69,14 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
     onFiltersChange(newFilters);
   };
 
-  const handleCustomSportChange = (value: string) => {
-    setCustomSport(value);
-    if (value.trim()) {
-      const newFilters = { ...filters, customSport: value.trim() };
+  const handleOtherSportAdd = () => {
+    if (otherSport.trim()) {
+      const newFilters = { ...filters, customSport: otherSport.trim() };
       setFilters(newFilters);
       onFiltersChange(newFilters);
+      setOtherSport('');
+      setShowOthersInput(false);
     }
-  };
-
-  const clearCustomSport = () => {
-    setCustomSport('');
-    setShowCustomInput(false);
-    const newFilters = { ...filters, customSport: undefined };
-    setFilters(newFilters);
-    onFiltersChange(newFilters);
   };
 
   const resetFilters = () => {
@@ -106,8 +88,7 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
       maxDistance: 50,
     };
     setFilters(resetFilters);
-    setCustomSport('');
-    setShowCustomInput(false);
+    setOtherSport('');
     onFiltersChange(resetFilters);
   };
 
@@ -124,19 +105,28 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
       {/* Filter Toggle Button */}
       <button
         onClick={() => setShowFilters(!showFilters)}
-        className="w-full bg-primary text-white font-semibold py-3 rounded-lg flex items-center justify-between px-4 hover:opacity-90 transition"
+        className="w-full md:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition font-semibold flex items-center justify-center gap-2"
       >
-        <span>🔍 Filters {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
-        <span>{showFilters ? '▼' : '▶'}</span>
+        🔍 Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
       </button>
 
-      {/* Filter Panel */}
+      {/* Reset Button */}
+      {activeFilterCount > 0 && (
+        <button
+          onClick={resetFilters}
+          className="ml-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:opacity-90 transition text-sm"
+        >
+          Reset
+        </button>
+      )}
+
+      {/* Filters Panel */}
       {showFilters && (
-        <div className="bg-surface rounded-lg border border-border p-6 mt-4 space-y-6">
+        <div className="mt-4 p-6 bg-surface rounded-lg border border-border space-y-6">
           {/* Sport Type Filter */}
           <div>
-            <h3 className="font-semibold text-foreground mb-3">Sport Type</h3>
-            <div className="grid grid-cols-2 gap-2 mb-4 max-h-64 overflow-y-auto">
+            <h3 className="font-semibold text-foreground mb-3">Sport Type (Top 10)</h3>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
               {SPORTS.map(sport => (
                 <label key={sport} className="flex items-center space-x-2 cursor-pointer">
                   <input
@@ -145,70 +135,67 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
                     onChange={() => handleSportToggle(sport)}
                     className="w-4 h-4 rounded"
                   />
-                  <span className="text-sm capitalize text-foreground">{sport}</span>
+                  <span className="text-sm text-foreground capitalize">{sport}</span>
                 </label>
               ))}
             </div>
-            
-            {/* Custom Sport Section */}
-            <div className="border-t border-border pt-4">
-              {customSport ? (
-                <div className="flex items-center justify-between bg-primary/10 rounded-lg p-3">
-                  <span className="text-sm font-semibold text-foreground">Custom: {customSport}</span>
-                  <button
-                    onClick={clearCustomSport}
-                    className="text-xs bg-error text-white px-2 py-1 rounded hover:opacity-90"
-                  >
-                    ✕ Clear
-                  </button>
-                </div>
-              ) : showCustomInput ? (
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    placeholder="Enter custom sport (e.g., Pickleball, Squash)"
-                    value={customSport}
-                    onChange={(e) => handleCustomSportChange(e.target.value)}
-                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => setShowCustomInput(false)}
-                    className="w-full text-xs bg-muted text-foreground px-2 py-1 rounded hover:opacity-90"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
+            <button
+              onClick={() => setShowOthersInput(!showOthersInput)}
+              className="mt-3 w-full text-sm text-primary hover:underline"
+            >
+              + Others (Custom Sport)
+            </button>
+            {showOthersInput && (
+              <div className="mt-3 flex gap-2">
+                <input
+                  type="text"
+                  value={otherSport}
+                  onChange={(e) => setOtherSport(e.target.value)}
+                  placeholder="Enter custom sport..."
+                  className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
                 <button
-                  onClick={() => setShowCustomInput(true)}
-                  className="w-full text-sm bg-primary/20 text-primary font-semibold px-3 py-2 rounded-lg hover:bg-primary/30 transition"
+                  onClick={handleOtherSportAdd}
+                  className="px-3 py-2 bg-primary text-white rounded-lg text-sm hover:opacity-90 transition"
                 >
-                  + Add Custom Sport
+                  Add
                 </button>
-              )}
-            </div>
+              </div>
+            )}
+            {filters.customSport && (
+              <div className="mt-3 p-2 bg-primary/10 rounded-lg flex items-center justify-between">
+                <span className="text-sm text-primary font-semibold">{filters.customSport}</span>
+                <button
+                  onClick={() => {
+                    const newFilters = { ...filters, customSport: undefined };
+                    setFilters(newFilters);
+                    onFiltersChange(newFilters);
+                  }}
+                  className="text-primary hover:text-red-500 transition"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Skill Level Filter */}
           <div>
             <h3 className="font-semibold text-foreground mb-3">Skill Level</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {SKILL_LEVELS.map(skill => (
-                <label key={skill} className="flex items-center space-x-2 cursor-pointer">
+            <div className="space-y-2">
+              {SKILL_LEVELS.map(level => (
+                <label key={level} className="flex items-center space-x-2 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={filters.skillLevel.includes(skill)}
-                    onChange={() => handleSkillToggle(skill)}
+                    checked={filters.skillLevel.includes(level)}
+                    onChange={() => handleSkillToggle(level)}
                     className="w-4 h-4 rounded"
                   />
-                  <span className="text-sm text-foreground">{skill}</span>
+                  <span className="text-sm text-foreground">{level}</span>
                 </label>
               ))}
             </div>
           </div>
-
-
 
           {/* Time Range Filter */}
           <div>
@@ -231,26 +218,9 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
             </div>
           </div>
 
-          {/* Distance Filter */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-3">
-              Max Distance: {filters.maxDistance} km
-            </h3>
-            <input
-              type="range"
-              min="1"
-              max="50"
-              value={filters.maxDistance}
-              onChange={(e) => handleDistanceChange(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
           {/* Capacity Filter */}
           <div>
-            <h3 className="font-semibold text-foreground mb-3">
-              Min Available Spots: {filters.minCapacity}
-            </h3>
+            <h3 className="font-semibold text-foreground mb-3">Minimum Available Spots</h3>
             <input
               type="range"
               min="0"
@@ -259,17 +229,22 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
               onChange={(e) => handleCapacityChange(Number(e.target.value))}
               className="w-full"
             />
+            <p className="text-sm text-muted mt-2">{filters.minCapacity} spots minimum</p>
           </div>
 
-          {/* Reset Button */}
-          {activeFilterCount > 0 && (
-            <button
-              onClick={resetFilters}
-              className="w-full bg-muted text-foreground font-semibold py-2 rounded-lg hover:opacity-90 transition"
-            >
-              Reset Filters
-            </button>
-          )}
+          {/* Distance Filter */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-3">Maximum Distance</h3>
+            <input
+              type="range"
+              min="1"
+              max="50"
+              value={filters.maxDistance}
+              onChange={(e) => handleDistanceChange(Number(e.target.value))}
+              className="w-full"
+            />
+            <p className="text-sm text-muted mt-2">{filters.maxDistance} km</p>
+          </div>
         </div>
       )}
     </div>

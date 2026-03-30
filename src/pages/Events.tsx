@@ -37,12 +37,12 @@ export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
       volleyball: '🏐',
       badminton: '🏸',
       cricket: '🏏',
-      baseball: '⚾',
       running: '🏃',
       cycling: '🚴',
       swimming: '🏊',
+      yoga: '🧘',
     }
-    return emojis[sport] || '⚽'
+    return emojis[sport.toLowerCase()] || '⚽'
   }
 
   return (
