@@ -6,9 +6,10 @@ interface ClubDetailProps {
   clubId: string
   user: User
   onBack: () => void
+  onClubChat?: (clubId: string, clubName: string) => void
 }
 
-export default function ClubDetail({ clubId, user, onBack }: ClubDetailProps) {
+export default function ClubDetail({ clubId, user, onBack, onClubChat }: ClubDetailProps) {
   const [club, setClub] = useState<Club | null>(null)
   const [isMember, setIsMember] = useState(false)
 
@@ -111,7 +112,16 @@ export default function ClubDetail({ clubId, user, onBack }: ClubDetailProps) {
             >
               {isMember ? 'Leave Club' : 'Join Club'}
             </button>
-            <button className="px-6 py-3 rounded-lg font-semibold bg-surface border border-border text-foreground hover:bg-border transition">
+            <button
+              onClick={() => {
+                if (onClubChat) {
+                  onClubChat(club.id, club.name)
+                } else {
+                  alert(`Club chat for ${club.name} coming soon!`)
+                }
+              }}
+              className="px-6 py-3 rounded-lg font-semibold bg-surface border border-border text-foreground hover:bg-border transition"
+            >
               💬 Club Chat
             </button>
           </div>

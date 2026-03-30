@@ -113,7 +113,16 @@ export default function App() {
         {currentPage === 'map' && <MapView onSelectEvent={navigateToEventDetail} />}
         {currentPage === 'clubs' && <Clubs onSelectClub={navigateToClubDetail} />}
         {currentPage === 'club-detail' && selectedClubId && (
-          <ClubDetail clubId={selectedClubId} user={user} onBack={() => setCurrentPage('clubs')} />
+          <ClubDetail
+            clubId={selectedClubId}
+            user={user}
+            onBack={() => setCurrentPage('clubs')}
+            onClubChat={(clubId, clubName) => {
+              console.log('Opening club chat:', clubId, clubName)
+              alert(`Opening chat for ${clubName}...`)
+              setCurrentPage('messages')
+            }}
+          />
         )}
         {currentPage === 'messages' && <Messages user={user} />}
         {currentPage === 'profile' && <Profile user={user} onLogout={handleLogout} />}
