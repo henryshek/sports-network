@@ -33,12 +33,12 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
   }
 
   return (
-    <div className="pb-24">
+    <div className="pb-24 w-full">
       <h1 className="text-3xl font-bold text-foreground mb-6">Events Map</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Map Area */}
-        <div className="lg:col-span-2">
+      <div className="w-full">
+        {/* Map Area - Full width on mobile */}
+        <div className="w-full mb-6">
           <VisualMap
             events={events}
             onSelectEvent={(eventId) => {
@@ -50,7 +50,7 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
         </div>
 
         {/* Event Details Sidebar */}
-        <div className="lg:col-span-1">
+        <div className="w-full">
           {selectedEvent ? (
             <div className="bg-white rounded-lg border border-border p-6 sticky top-6">
               <h2 className="text-2xl font-bold text-foreground mb-4">{selectedEvent.title}</h2>
