@@ -1,25 +1,39 @@
 import { useState, useEffect } from 'react'
 import { mockEvents, mockUsers } from '@/mockData'
-import { Event, User } from '@/types'
+import { Event } from '@/types'
 
 interface EventDetailProps {
   eventId: string
-  user: User
   onBack: () => void
+  user?: { id: string; name: string }
 }
 
-export default function EventDetail({ eventId, user, onBack }: EventDetailProps) {
+interface UserProfile {
+  id: string
+  name: string
+  email: string
+  avatar: string
+  bio: string
+  sports: string[]
+  location: string
+  joinedDate: string
+}
+
+export default function EventDetail({ eventId, onBack }: EventDetailProps) {
   const [event, setEvent] = useState<Event | null>(null)
   const [isJoined, setIsJoined] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
+  const [showReserveModal, setShowReserveModal] = useState(false)
+  const [reserveFor, setReserveFor] = useState('')
+  const currentUserId = 'user1'
 
   useEffect(() => {
-    // Find event from mock data
     const foundEvent = mockEvents.find(e => e.id === eventId)
     if (foundEvent) {
       setEvent(foundEvent)
-      setIsJoined(foundEvent.participants.includes(user.id))
+      setIsJoined(foundEvent.participants.includes(currentUserId))
     }
-  }, [eventId, user.id])
+  }, [eventId])
 
   if (!event) {
     return (
@@ -41,22 +55,59 @@ export default function EventDetail({ eventId, user, onBack }: EventDetailProps)
       setEvent({
         ...event,
         currentParticipants: event.currentParticipants - 1,
-        participants: event.participants.filter(p => p !== user.id),
+        participants: event.participants.filter(p => p !== currentUserId),
       })
       setIsJoined(false)
     } else if (isFull) {
       setEvent({
         ...event,
-        waitlist: [...(event.waitlist || []), user.id],
+        waitlist: [...(event.waitlist || []), currentUserId],
       })
       alert('Added to waitlist!')
     } else {
       setEvent({
         ...event,
         currentParticipants: event.currentParticipants + 1,
-        participants: [...event.participants, user.id],
+        participants: [...event.participants, currentUserId],
       })
       setIsJoined(true)
+    }
+  }
+
+  const handleReserveSpot = () => {
+    if (!reserveFor) {
+      alert('Please select a friend to reserve for')
+      return
+    }
+
+      const newReservedGuests = Array.isArray(event.reservedGuests)
+        ? [...event.reservedGuests, { name: reserveFor, id: reserveFor }]
+        : [{ name: reserveFor, id: reserveFor }]
+      setEvent({
+        ...event,
+        currentParticipants: event.currentParticipants + 1,
+        participants: [...event.participants, reserveFor],
+        reservedGuests: newReservedGuests,
+      })
+
+    setShowReserveModal(false)
+    setReserveFor('')
+    alert('Spot reserved successfully!')
+  }
+
+  const handleViewProfile = (userId: string) => {
+    const user = mockUsers[userId as keyof typeof mockUsers]
+    if (user) {
+      setSelectedUser({
+        id: userId,
+        name: user.name as string,
+        email: user.email as string,
+        avatar: user.avatar as string,
+        bio: (user.bio as string) || 'No bio',
+        sports: (user.sports as string[]) || [],
+        location: (user.location as string) || 'Not specified',
+        joinedDate: (user.joinedDate as string) || new Date().toISOString(),
+      })
     }
   }
 
@@ -97,11 +148,11 @@ export default function EventDetail({ eventId, user, onBack }: EventDetailProps)
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             <div>
               <p className="text-sm text-muted">📅 Date & Time</p>
-              <p className="text-lg font-semibold text-foreground">{event.date} at {event.time}</p>
+              <p className="text-lg font-semibold text-foreground">{event.date || 'TBD'} at {event.time || 'TBD'}</p>
             </div>
             <div>
               <p className="text-sm text-muted">📍 Location</p>
-              <p className="text-lg font-semibold text-foreground">{event.location}</p>
+              <p className="text-lg font-semibold text-foreground">{event.location || 'TBD'}</p>
             </div>
             <div>
               <p className="text-sm text-muted">👥 Participants</p>
@@ -145,6 +196,12 @@ export default function EventDetail({ eventId, user, onBack }: EventDetailProps)
             >
               {isJoined ? 'Leave Event' : isFull ? 'Join Waitlist' : 'Join Event'}
             </button>
+            <button
+              onClick={() => setShowReserveModal(true)}
+              className="px-6 py-3 rounded-lg font-semibold bg-surface border border-border text-foreground hover:bg-border transition"
+            >
+              🎫 Reserve Spot
+            </button>
             <button className="px-6 py-3 rounded-lg font-semibold bg-surface border border-border text-foreground hover:bg-border transition">
               💬 Message Organizer
             </button>
@@ -156,15 +213,18 @@ export default function EventDetail({ eventId, user, onBack }: EventDetailProps)
       {event.organizer && (
         <div className="bg-white rounded-lg border border-border p-6 mb-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Organizer</h2>
-          <div className="flex items-center gap-4">
+          <button
+            onClick={() => handleViewProfile(event.organizer?.id || 'user1')}
+            className="flex items-center gap-4 w-full hover:opacity-70 transition"
+          >
             <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-bold">
               {event.organizer.avatar || event.organizer.name[0]}
             </div>
-            <div>
+            <div className="text-left">
               <p className="font-semibold text-foreground">{event.organizer.name}</p>
               <p className="text-muted text-sm">{event.organizer.bio || 'No bio'}</p>
             </div>
-          </div>
+          </button>
         </div>
       )}
 
@@ -175,15 +235,19 @@ export default function EventDetail({ eventId, user, onBack }: EventDetailProps)
           {event.participants.slice(0, 5).map((participantId, i) => {
             const participant = mockUsers[participantId as keyof typeof mockUsers]
             return (
-              <div key={i} className="flex items-center justify-between p-3 bg-surface rounded-lg">
+              <button
+                key={i}
+                onClick={() => handleViewProfile(participantId)}
+                className="w-full flex items-center justify-between p-3 bg-surface rounded-lg hover:bg-border transition"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
                     {participant?.avatar || '👤'}
                   </div>
                   <p className="font-medium text-foreground">{participant?.name || 'User'}</p>
                 </div>
-                <span className="text-sm text-muted">Joined</span>
-              </div>
+                <span className="text-sm text-muted">View →</span>
+              </button>
             )
           })}
           {event.participants.length > 5 && (
@@ -194,14 +258,141 @@ export default function EventDetail({ eventId, user, onBack }: EventDetailProps)
 
       {/* Waitlist */}
       {event.waitlist && event.waitlist.length > 0 && (
-        <div className="bg-white rounded-lg border border-border p-6">
+        <div className="bg-white rounded-lg border border-border p-6 mb-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Waitlist ({event.waitlist.length})</h2>
           <div className="space-y-2">
-            {event.waitlist.map((userId, i) => (
-              <p key={i} className="text-sm text-muted">
-                #{i + 1} - {mockUsers[userId as keyof typeof mockUsers]?.name || 'User'}
-              </p>
-            ))}
+            {event.waitlist.map((userId, i) => {
+              const user = mockUsers[userId as keyof typeof mockUsers]
+              return (
+                <div key={i} className="flex items-center gap-2 p-2 bg-surface rounded">
+                  <span className="text-sm text-muted">#{i + 1}</span>
+                  <p className="text-sm text-foreground">{user?.name || 'User'}</p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* User Profile Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-foreground">User Profile</h2>
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="text-2xl text-muted hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Avatar */}
+              <div className="flex justify-center">
+                <div className="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center text-4xl font-bold">
+                  {selectedUser.avatar}
+                </div>
+              </div>
+
+              {/* Name */}
+              <div className="text-center">
+                <p className="text-2xl font-bold text-foreground">{selectedUser.name}</p>
+                <p className="text-sm text-muted">{selectedUser.email}</p>
+              </div>
+
+              {/* Bio */}
+              {selectedUser.bio && (
+                <div>
+                  <p className="text-sm text-muted">Bio</p>
+                  <p className="text-foreground">{selectedUser.bio}</p>
+                </div>
+              )}
+
+              {/* Sports */}
+              {selectedUser.sports && selectedUser.sports.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted">Sports</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedUser.sports.map(sport => (
+                      <span key={sport} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm capitalize">
+                        {sport}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Location */}
+              {selectedUser.location && (
+                <div>
+                  <p className="text-sm text-muted">📍 Location</p>
+                  <p className="text-foreground">{selectedUser.location}</p>
+                </div>
+              )}
+
+              {/* Joined Date */}
+              <div>
+                <p className="text-sm text-muted">Joined</p>
+                <p className="text-foreground">{new Date(selectedUser.joinedDate).toLocaleDateString()}</p>
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedUser(null)}
+                className="w-full mt-6 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reserve Spot Modal */}
+      {showReserveModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-8">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Reserve a Spot</h2>
+
+            <div className="space-y-4">
+              <p className="text-muted">Select a friend to reserve a spot for:</p>
+
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {Object.entries(mockUsers)
+                  .filter(([id]) => id !== 'user1')
+                  .map(([userId, user]) => (
+                    <button
+                      key={userId}
+                      onClick={() => setReserveFor(userId)}
+                      className={`w-full text-left p-3 rounded-lg border-2 transition ${
+                        reserveFor === userId
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border hover:border-primary'
+                      }`}
+                    >
+                      <p className="font-medium text-foreground">{user.name}</p>
+                      <p className="text-sm text-muted">{user.sports?.join(', ') || 'Athlete'}</p>
+                    </button>
+                  ))}
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={() => setShowReserveModal(false)}
+                  className="flex-1 px-4 py-2 border border-border rounded-lg text-foreground hover:bg-surface transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleReserveSpot}
+                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition"
+                >
+                  Reserve
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
