@@ -132,7 +132,10 @@ export default function Home({ user, onNavigate }: HomeProps) {
                 <p>📍 {event.location}</p>
                 <p>👥 {event.currentParticipants}/{event.maxParticipants} participants</p>
               </div>
-              <button className="w-full bg-primary text-white py-2 rounded-lg hover:opacity-90 transition">
+              <button
+                onClick={() => onNavigate('event-detail')}
+                className="w-full bg-primary text-white py-2 rounded-lg hover:opacity-90 transition"
+              >
                 View Details
               </button>
             </div>
@@ -164,7 +167,10 @@ export default function Home({ user, onNavigate }: HomeProps) {
               <p className="text-muted mb-4">{club.description}</p>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted">👥 {club.members.length} members</span>
-                <button className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
+                <button
+                  onClick={() => onNavigate('clubs')}
+                  className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                >
                   Join
                 </button>
               </div>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { mockEvents } from '@/mockData'
 import { Event } from '@/types'
-import VisualMap from '@/components/VisualMap'
+import MobileMapView from '@/components/MobileMapView'
 
 interface MapViewProps {
   onSelectEvent: (eventId: string) => void
@@ -39,7 +39,7 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
       <div className="w-full">
         {/* Map Area - Full width on mobile */}
         <div className="w-full mb-6">
-          <VisualMap
+          <MobileMapView
             events={events}
             onSelectEvent={(eventId) => {
               const event = events.find(e => e.id === eventId)
