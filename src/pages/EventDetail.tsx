@@ -288,7 +288,7 @@ export default function EventDetail({ eventId, onBack }: EventDetailProps) {
                     <p className="text-sm text-foreground">{user?.name || guestName}</p>
                   </div>
                   <button
-                    onClick={() => handleCancelReserve(guestId)}
+                    onClick={() => handleCancelReserve(guestId || '')}
                     className="text-xs px-3 py-1 bg-error text-white rounded hover:opacity-90 transition"
                   >
                     Cancel
