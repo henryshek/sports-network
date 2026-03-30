@@ -18,6 +18,53 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
     minCapacity: 0,
     maxDistance: 50,
   })
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [showNearbyOnly, setShowNearbyOnly] = useState(false)
+  const [locationError, setLocationError] = useState<string>('')
+
+  const requestUserLocation = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          })
+          setLocationError('')
+        },
+        (error) => {
+          setLocationError('Unable to get your location. Please enable location services.')
+          console.error('Geolocation error:', error)
+        }
+      )
+    } else {
+      setLocationError('Geolocation is not supported by your browser')
+    }
+  }
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371 // Earth's radius in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180
+    const dLon = ((lon2 - lon1) * Math.PI) / 180
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c
+  }
+
+  const isToday = (dateString: string) => {
+    const eventDate = new Date(dateString)
+    const today = new Date()
+    return (
+      eventDate.getDate() === today.getDate() &&
+      eventDate.getMonth() === today.getMonth() &&
+      eventDate.getFullYear() === today.getFullYear()
+    )
+  }
 
   const filteredEvents = events.filter(event => {
     // Sport type filter
@@ -29,8 +76,6 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
     if (filters.skillLevel.length > 0 && !filters.skillLevel.includes(event.skillLevel)) {
       return false
     }
-
-
 
     // Capacity filter (available spots)
     const availableSpots = event.maxParticipants - event.currentParticipants
@@ -57,6 +102,19 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
         nextMonth.setMonth(nextMonth.getMonth() + 1)
         if (eventDate < today || eventDate >= nextMonth) return false
       }
+    }
+
+    // Nearby today filter
+    if (showNearbyOnly && userLocation) {
+      const distance = calculateDistance(
+        userLocation.lat,
+        userLocation.lng,
+        event.latitude || 0,
+        event.longitude || 0
+      )
+      const isNearby = distance <= 10 // 10 km radius
+      const isEventToday = isToday(event.date)
+      return isNearby && isEventToday
     }
 
     return true
@@ -86,6 +144,40 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
   return (
     <div className="pb-24 w-full">
       <h1 className="text-3xl font-bold text-foreground mb-6">Events Map</h1>
+
+      {/* Geolocation and Nearby Button */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={requestUserLocation}
+          className="flex-1 bg-secondary text-white px-4 py-2 rounded-lg hover:opacity-90 transition font-semibold flex items-center justify-center gap-2"
+        >
+          📍 {userLocation ? 'Location Found' : 'Find My Location'}
+        </button>
+        {userLocation && (
+          <button
+            onClick={() => setShowNearbyOnly(!showNearbyOnly)}
+            className={`flex-1 px-4 py-2 rounded-lg transition font-semibold ${
+              showNearbyOnly
+                ? 'bg-primary text-white'
+                : 'bg-surface text-foreground hover:bg-border'
+            }`}
+          >
+            🔍 Nearby Today
+          </button>
+        )}
+      </div>
+
+      {locationError && (
+        <div className="bg-error/10 border border-error text-error px-4 py-2 rounded-lg text-sm mb-4">
+          {locationError}
+        </div>
+      )}
+
+      {showNearbyOnly && userLocation && (
+        <div className="bg-primary/10 border border-primary text-primary px-4 py-2 rounded-lg text-sm mb-4">
+          ✓ Showing events happening today within 10 km of your location
+        </div>
+      )}
 
       {/* Filters */}
       <EventMapFilters onFiltersChange={setFilters} />
