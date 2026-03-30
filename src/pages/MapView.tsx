@@ -187,17 +187,16 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
         Showing {filteredEvents.length} of {events.length} events
       </div>
 
-      <div className="w-full">
-        {/* Map Area - Full width on mobile */}
-        <div className="w-full mb-6">
-          <LeafletMap
-            events={filteredEvents}
-            onEventSelect={handleEventClick}
-          />
-        </div>
+      {/* Map Area - Full width */}
+      <div className="w-full mb-6">
+        <LeafletMap
+          events={filteredEvents}
+          onEventSelect={handleEventClick}
+        />
+      </div>
 
-        {/* Event Details Sidebar */}
-        <div className="w-full">
+      {/* Event Details Card Below Map */}
+      <div className="w-full">
           {selectedEvent && filteredEvents.some(e => e.id === selectedEvent.id) ? (
             <div className="bg-white rounded-lg border border-border p-6 sticky top-6">
               <h2 className="text-2xl font-bold text-foreground mb-4">{selectedEvent.title}</h2>
@@ -274,10 +273,10 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
             </div>
           ) : (
             <div className="bg-surface rounded-lg border border-border p-6 text-center">
-              <p className="text-muted">Select an event to see details</p>
+              <p className="text-muted">Click on a map pin to see event details</p>
             </div>
-          )}
-        </div>
+          )
+        }
       </div>
     </div>
   )
