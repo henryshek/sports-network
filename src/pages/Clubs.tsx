@@ -134,8 +134,7 @@ export default function Clubs({ onSelectClub }: ClubsProps) {
           filteredClubs.map(club => (
             <div
               key={club.id}
-              onClick={() => onSelectClub(club.id)}
-              className="bg-white rounded-lg border border-border overflow-hidden hover:shadow-lg transition cursor-pointer"
+              className="bg-white rounded-lg border border-border overflow-hidden hover:shadow-lg transition"
             >
               {/* Header */}
               <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-6 h-32 flex items-end">
@@ -161,6 +160,22 @@ export default function Clubs({ onSelectClub }: ClubsProps) {
                     {club.isPrivate ? 'Private' : 'Public'}
                   </span>
                 </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 p-6 border-t border-border">
+                <button
+                  onClick={() => onSelectClub(club.id)}
+                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:opacity-90 transition font-semibold text-sm"
+                >
+                  View Club
+                </button>
+                <button
+                  onClick={() => onSelectClub(club.id)}
+                  className="flex-1 bg-surface text-primary py-2 rounded-lg hover:bg-border transition font-semibold text-sm border border-primary"
+                >
+                  Join
+                </button>
               </div>
             </div>
           ))

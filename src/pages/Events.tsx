@@ -92,8 +92,7 @@ export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
           filteredEvents.map(event => (
             <div
               key={event.id}
-              onClick={() => onSelectEvent(event.id)}
-              className="bg-white rounded-lg border border-border p-6 hover:shadow-lg transition cursor-pointer"
+              className="bg-white rounded-lg border border-border p-6 hover:shadow-lg transition"
             >
               <div className="flex justify-between items-start mb-3">
                 <div>
@@ -169,6 +168,14 @@ export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
                   {event.waitlist.length} people on waitlist
                 </p>
               )}
+
+              {/* View Details Button */}
+              <button
+                onClick={() => onSelectEvent(event.id)}
+                className="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:opacity-90 transition font-semibold"
+              >
+                View Details
+              </button>
             </div>
           ))
         ) : (
