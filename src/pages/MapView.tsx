@@ -151,9 +151,6 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
   }
 
   const topSports = TOP_SPORTS.map(s => s.toLowerCase())
-  const allSports = Array.from(new Set(events.map(e => e.sportType)))
-  const customSports = allSports.filter(s => !isTopSport(s))
-  const hasCustomSports = customSports.length > 0
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event)
@@ -221,24 +218,22 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
               filters.sportType.includes(sport) ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
             }`}
           >
-            {getSportEmoji(sport)} {sport}
+            {getSportEmoji(sport)} {sport.charAt(0).toUpperCase() + sport.slice(1)}
           </button>
         ))}
-        {hasCustomSports && (
-          <button
-            onClick={() => {
-              const updated = filters.sportType.includes('others')
-                ? filters.sportType.filter(s => s !== 'others')
-                : [...filters.sportType, 'others']
-              setFilters({ ...filters, sportType: updated })
-            }}
-            className={`px-4 py-2 rounded-full transition whitespace-nowrap ${
-              filters.sportType.includes('others') ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
-            }`}
-          >
-            🏅 Others ({customSports.length})
-          </button>
-        )}
+        <button
+          onClick={() => {
+            const updated = filters.sportType.includes('others')
+              ? filters.sportType.filter(s => s !== 'others')
+              : [...filters.sportType, 'others']
+            setFilters({ ...filters, sportType: updated })
+          }}
+          className={`px-4 py-2 rounded-full transition whitespace-nowrap ${
+            filters.sportType.includes('others') ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
+          }`}
+        >
+          🏅 Others
+        </button>
       </div>
 
       {/* Filters */}

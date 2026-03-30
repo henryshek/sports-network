@@ -15,9 +15,6 @@ export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
   const [events] = useState<Event[]>(mockEvents)
 
   const topSports = TOP_SPORTS.map(s => s.toLowerCase())
-  const allSports = Array.from(new Set(events.map(e => e.sportType)))
-  const customSports = allSports.filter(s => !isTopSport(s))
-  const hasCustomSports = customSports.length > 0
 
   const filteredEvents = events.filter(event => {
     const matchesSearch =
@@ -98,19 +95,17 @@ export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
                 selectedSport === sport ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
               }`}
             >
-              {getSportEmoji(sport)} {sport}
+              {getSportEmoji(sport)} {sport.charAt(0).toUpperCase() + sport.slice(1)}
             </button>
           ))}
-          {hasCustomSports && (
-            <button
-              onClick={() => setSelectedSport('others')}
-              className={`px-4 py-2 rounded-full transition whitespace-nowrap ${
-                selectedSport === 'others' ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
-              }`}
-            >
-              + Others ({customSports.length})
-            </button>
-          )}
+          <button
+            onClick={() => setSelectedSport('others')}
+            className={`px-4 py-2 rounded-full transition whitespace-nowrap ${
+              selectedSport === 'others' ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
+            }`}
+          >
+            🏅 Others
+          </button>
         </div>
       </div>
 
