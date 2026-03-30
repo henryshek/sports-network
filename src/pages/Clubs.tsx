@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { mockClubs } from '@/mockData'
 import { Club } from '@/types'
-import { TOP_SPORTS } from '@/constants/sports'
+import { TOP_SPORTS, isTopSport } from '@/constants/sports'
 
 interface ClubsProps {
   onSelectClub: (clubId: string) => void
@@ -24,13 +24,21 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
   const [customSportName, setCustomSportName] = useState('')
 
   const topSports = TOP_SPORTS.map(s => s.toLowerCase())
-  const sports = Array.from(new Set(clubs.map(c => c.sport)))
 
   const filteredClubs = clubs.filter(club => {
     const matchesSearch =
       club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       club.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesSport = !selectedSport || club.sport === selectedSport
+    
+    let matchesSport = true
+    if (selectedSport) {
+      if (selectedSport === 'others') {
+        matchesSport = !isTopSport(club.sport)
+      } else {
+        matchesSport = club.sport.toLowerCase() === selectedSport.toLowerCase()
+      }
+    }
+    
     return matchesSearch && matchesSport
   })
 
@@ -121,26 +129,34 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
           className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         />
 
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap overflow-x-auto pb-2">
           <button
             onClick={() => setSelectedSport('')}
-            className={`px-4 py-2 rounded-lg transition ${
+            className={`px-4 py-2 rounded-full transition whitespace-nowrap font-semibold ${
               !selectedSport ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
             }`}
           >
             All Sports
           </button>
-          {sports.map(sport => (
+          {topSports.map(sport => (
             <button
               key={sport}
               onClick={() => setSelectedSport(sport)}
-              className={`px-4 py-2 rounded-lg transition capitalize ${
+              className={`px-4 py-2 rounded-full transition capitalize whitespace-nowrap ${
                 selectedSport === sport ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
               }`}
             >
               {getSportEmoji(sport)} {sport}
             </button>
           ))}
+          <button
+            onClick={() => setSelectedSport('others')}
+            className={`px-4 py-2 rounded-full transition whitespace-nowrap ${
+              selectedSport === 'others' ? 'bg-primary text-white' : 'bg-surface text-foreground hover:bg-border'
+            }`}
+          >
+            🏅 Others
+          </button>
         </div>
       </div>
 
