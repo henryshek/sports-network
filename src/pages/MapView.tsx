@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { mockEvents } from '@/mockData'
 import { Event } from '@/types'
-import SimpleMapView from '@/components/SimpleMapView'
+import { LeafletMap } from '@/components/LeafletMap'
 
 interface MapViewProps {
   onSelectEvent: (eventId: string) => void
@@ -39,13 +39,9 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
       <div className="w-full">
         {/* Map Area - Full width on mobile */}
         <div className="w-full mb-6">
-          <SimpleMapView
+          <LeafletMap
             events={events}
-            onSelectEvent={(eventId) => {
-              const event = events.find(e => e.id === eventId)
-              if (event) handleEventClick(event)
-            }}
-            selectedEventId={selectedEvent?.id}
+            onEventSelect={handleEventClick}
           />
         </div>
 
