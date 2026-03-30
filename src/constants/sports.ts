@@ -1,4 +1,4 @@
-// Top 10 hottest sports activities
+// Top 11 hottest sports activities
 export const TOP_SPORTS = [
   'Basketball',
   'Soccer',
@@ -10,6 +10,7 @@ export const TOP_SPORTS = [
   'Cycling',
   'Swimming',
   'Yoga',
+  'Pickleball',
 ] as const
 
 export const SPORT_EMOJIS: Record<string, string> = {
@@ -23,6 +24,7 @@ export const SPORT_EMOJIS: Record<string, string> = {
   cycling: '🚴',
   swimming: '🏊',
   yoga: '🧘',
+  pickleball: '🏓',
 }
 
 export function getSportEmoji(sport: string): string {

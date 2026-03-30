@@ -46,6 +46,8 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       cycling: '🚴',
       swimming: '🏊',
       yoga: '🧘',
+      pickleball: '🏓',
+      others: '🏅',
     }
     return emojis[sport.toLowerCase()] || '⚽'
   }
@@ -230,12 +232,15 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Sport (Top 10)</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Sport (Top 11 + Others)</label>
                 <select
                   value={showCustomSport ? 'custom' : formData.sport}
                   onChange={(e) => {
                     if (e.target.value === 'custom') {
                       setShowCustomSport(true)
+                    } else if (e.target.value === 'others') {
+                      setShowCustomSport(false)
+                      setFormData({ ...formData, sport: 'Others' })
                     } else {
                       setShowCustomSport(false)
                       setFormData({ ...formData, sport: e.target.value })
@@ -248,7 +253,8 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
                       {sport.charAt(0).toUpperCase() + sport.slice(1)}
                     </option>
                   ))}
-                  <option value="custom">+ Others (Custom Sport)</option>
+                  <option value="others">Others</option>
+                  <option value="custom">+ Custom Sport</option>
                 </select>
               </div>
 

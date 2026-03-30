@@ -145,6 +145,7 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
       cycling: '🚴',
       swimming: '🏊',
       yoga: '🧘',
+      pickleball: '🏓',
     }
     return emojis[sport.toLowerCase()] || '⚽'
   }
