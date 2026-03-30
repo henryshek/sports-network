@@ -7,13 +7,25 @@ export interface EventFilters {
   district: string[];
   minCapacity: number;
   maxDistance: number;
+  customSport?: string;
 }
 
 interface EventMapFiltersProps {
   onFiltersChange: (filters: EventFilters) => void;
 }
 
-const SPORTS = ['basketball', 'soccer', 'tennis', 'volleyball', 'badminton', 'cricket', 'baseball', 'running', 'cycling', 'swimming'];
+const SPORTS = [
+  'basketball', 'soccer', 'tennis', 'volleyball', 'badminton', 'cricket', 'baseball',
+  'running', 'cycling', 'swimming', 'golf', 'hockey', 'rugby', 'american football',
+  'table tennis', 'squash', 'pickleball', 'martial arts', 'boxing',
+  'wrestling', 'weightlifting', 'yoga', 'pilates', 'crossfit', 'rock climbing',
+  'skateboarding', 'surfing', 'kayaking', 'hiking', 'mountain biking', 'ice skating',
+  'roller skating', 'bowling', 'archery', 'fencing', 'gymnastics', 'parkour',
+  'dance', 'aerobics', 'zumba', 'tai chi', 'karate', 'judo', 'taekwondo',
+  'handball', 'lacrosse', 'ultimate frisbee', 'cornhole', 'paddleball', 'racquetball',
+  'badminton', 'darts', 'pool', 'billiards', 'ping pong', 'tennis'
+];
+
 const SKILL_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Professional'];
 const DISTRICTS = ['Golden Gate Park', 'Mission Bay', 'Ocean Beach', 'Dolores Park', 'Downtown', 'Central Park'];
 
@@ -28,6 +40,8 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
   });
 
   const [showFilters, setShowFilters] = useState(false);
+  const [customSport, setCustomSport] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const handleSportToggle = (sport: string) => {
     const updated = filters.sportType.includes(sport)
@@ -77,6 +91,23 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
     onFiltersChange(newFilters);
   };
 
+  const handleCustomSportChange = (value: string) => {
+    setCustomSport(value);
+    if (value.trim()) {
+      const newFilters = { ...filters, customSport: value.trim() };
+      setFilters(newFilters);
+      onFiltersChange(newFilters);
+    }
+  };
+
+  const clearCustomSport = () => {
+    setCustomSport('');
+    setShowCustomInput(false);
+    const newFilters = { ...filters, customSport: undefined };
+    setFilters(newFilters);
+    onFiltersChange(newFilters);
+  };
+
   const resetFilters = () => {
     const resetFilters: EventFilters = {
       sportType: [],
@@ -87,6 +118,8 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
       maxDistance: 50,
     };
     setFilters(resetFilters);
+    setCustomSport('');
+    setShowCustomInput(false);
     onFiltersChange(resetFilters);
   };
 
@@ -96,7 +129,8 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
     filters.district.length + 
     (filters.timeRange !== 'all' ? 1 : 0) +
     (filters.minCapacity > 0 ? 1 : 0) +
-    (filters.maxDistance < 50 ? 1 : 0);
+    (filters.maxDistance < 50 ? 1 : 0) +
+    (filters.customSport ? 1 : 0);
 
   return (
     <div className="mb-6">
@@ -115,7 +149,7 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
           {/* Sport Type Filter */}
           <div>
             <h3 className="font-semibold text-foreground mb-3">Sport Type</h3>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 mb-4 max-h-64 overflow-y-auto">
               {SPORTS.map(sport => (
                 <label key={sport} className="flex items-center space-x-2 cursor-pointer">
                   <input
@@ -127,6 +161,45 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
                   <span className="text-sm capitalize text-foreground">{sport}</span>
                 </label>
               ))}
+            </div>
+            
+            {/* Custom Sport Section */}
+            <div className="border-t border-border pt-4">
+              {customSport ? (
+                <div className="flex items-center justify-between bg-primary/10 rounded-lg p-3">
+                  <span className="text-sm font-semibold text-foreground">Custom: {customSport}</span>
+                  <button
+                    onClick={clearCustomSport}
+                    className="text-xs bg-error text-white px-2 py-1 rounded hover:opacity-90"
+                  >
+                    ✕ Clear
+                  </button>
+                </div>
+              ) : showCustomInput ? (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Enter custom sport (e.g., Pickleball, Squash)"
+                    value={customSport}
+                    onChange={(e) => handleCustomSportChange(e.target.value)}
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => setShowCustomInput(false)}
+                    className="w-full text-xs bg-muted text-foreground px-2 py-1 rounded hover:opacity-90"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowCustomInput(true)}
+                  className="w-full text-sm bg-primary/20 text-primary font-semibold px-3 py-2 rounded-lg hover:bg-primary/30 transition"
+                >
+                  + Add Custom Sport
+                </button>
+              )}
             </div>
           </div>
 
