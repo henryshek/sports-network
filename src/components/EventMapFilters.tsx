@@ -4,7 +4,6 @@ export interface EventFilters {
   sportType: string[];
   skillLevel: string[];
   timeRange: 'all' | 'today' | 'week' | 'month';
-  district: string[];
   minCapacity: number;
   maxDistance: number;
   customSport?: string;
@@ -27,14 +26,12 @@ const SPORTS = [
 ];
 
 const SKILL_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Professional'];
-const DISTRICTS = ['Golden Gate Park', 'Mission Bay', 'Ocean Beach', 'Dolores Park', 'Downtown', 'Central Park'];
 
 export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
   const [filters, setFilters] = useState<EventFilters>({
     sportType: [],
     skillLevel: [],
     timeRange: 'all',
-    district: [],
     minCapacity: 0,
     maxDistance: 50,
   });
@@ -63,15 +60,7 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
     onFiltersChange(newFilters);
   };
 
-  const handleDistrictToggle = (district: string) => {
-    const updated = filters.district.includes(district)
-      ? filters.district.filter(d => d !== district)
-      : [...filters.district, district];
-    
-    const newFilters = { ...filters, district: updated };
-    setFilters(newFilters);
-    onFiltersChange(newFilters);
-  };
+
 
   const handleTimeChange = (time: 'all' | 'today' | 'week' | 'month') => {
     const newFilters = { ...filters, timeRange: time };
@@ -113,7 +102,6 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
       sportType: [],
       skillLevel: [],
       timeRange: 'all',
-      district: [],
       minCapacity: 0,
       maxDistance: 50,
     };
@@ -126,7 +114,6 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
   const activeFilterCount = 
     filters.sportType.length + 
     filters.skillLevel.length + 
-    filters.district.length + 
     (filters.timeRange !== 'all' ? 1 : 0) +
     (filters.minCapacity > 0 ? 1 : 0) +
     (filters.maxDistance < 50 ? 1 : 0) +
@@ -221,23 +208,7 @@ export function EventMapFilters({ onFiltersChange }: EventMapFiltersProps) {
             </div>
           </div>
 
-          {/* District Filter */}
-          <div>
-            <h3 className="font-semibold text-foreground mb-3">District/Area</h3>
-            <div className="space-y-2">
-              {DISTRICTS.map(district => (
-                <label key={district} className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={filters.district.includes(district)}
-                    onChange={() => handleDistrictToggle(district)}
-                    className="w-4 h-4 rounded"
-                  />
-                  <span className="text-sm text-foreground">{district}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+
 
           {/* Time Range Filter */}
           <div>

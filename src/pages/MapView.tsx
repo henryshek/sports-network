@@ -15,7 +15,6 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
     sportType: [],
     skillLevel: [],
     timeRange: 'all',
-    district: [],
     minCapacity: 0,
     maxDistance: 50,
   })
@@ -31,10 +30,7 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
       return false
     }
 
-    // District filter
-    if (filters.district.length > 0 && !filters.district.some(d => event.location.includes(d))) {
-      return false
-    }
+
 
     // Capacity filter (available spots)
     const availableSpots = event.maxParticipants - event.currentParticipants

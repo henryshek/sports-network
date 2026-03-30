@@ -4,6 +4,23 @@ export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'professiona
 
 export type EventStatus = 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
 
+export interface UserRating {
+  id: string
+  ratedBy: string
+  ratedUser: string
+  eventId: string
+  rating: number // 1-5 stars
+  comment?: string
+  createdAt: string
+}
+
+export interface UserSkillStats {
+  sport: SportType
+  skillLevel: SkillLevel
+  activitiesParticipated: number
+  averageRating?: number
+}
+
 export interface User {
   id: string
   name: string
@@ -16,6 +33,10 @@ export interface User {
   location?: string
   joinedDate?: string
   createdAt?: string
+  ratings?: UserRating[]
+  skillStats?: UserSkillStats[]
+  totalActivitiesParticipated?: number
+  averageRating?: number
 }
 
 export interface Event {
@@ -26,6 +47,7 @@ export interface Event {
   date: string
   time: string
   location: string
+  locationName?: string // Nearest location name
   latitude?: number
   longitude?: number
   skillLevel: SkillLevel
@@ -38,6 +60,7 @@ export interface Event {
   waitlist?: string[]
   coHosts?: string[]
   reservedGuests?: { name: string; id?: string; status?: 'pending' | 'approved' | 'rejected'; reservedBy?: string }[]
+  ratings?: UserRating[]
   createdAt: string
   updatedAt: string
 }
