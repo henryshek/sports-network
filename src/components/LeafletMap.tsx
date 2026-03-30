@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Event } from '../types';
@@ -39,14 +39,14 @@ export function LeafletMap({ events, onEventSelect }: LeafletMapProps) {
     }
 
     // Clear existing markers
-    map.current.eachLayer((layer) => {
+    map.current.eachLayer((layer: L.Layer) => {
       if (layer instanceof L.Marker) {
         map.current?.removeLayer(layer);
       }
     });
 
     // Add event markers
-    events.forEach((event, index) => {
+    events.forEach((event) => {
       const coordinates = getCoordinates(event.location);
       if (coordinates) {
         const marker = L.marker(coordinates, { icon: defaultIcon })
