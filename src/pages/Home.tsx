@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react'
-import { User, Event, Club } from '@/types'
-import { Calendar, Users, MessageSquare, Trophy, Zap, ArrowRight } from 'lucide-react'
+
+import { User } from '@/types'
+import { Calendar, Users, MessageSquare, Trophy, Zap } from 'lucide-react'
 
 interface HomeProps {
   user: User
-  onNavigate: (page: string) => void
 }
 
-export default function Home({ user, onNavigate }: HomeProps) {
+export default function Home({ user }: HomeProps) {
 
 
   return (
