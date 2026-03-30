@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { mockEvents } from '@/mockData'
 import { Event } from '@/types'
+import GoogleMapComponent from '@/components/GoogleMapComponent'
 
 interface MapViewProps {
   onSelectEvent: (eventId: string) => void
@@ -38,50 +39,14 @@ export default function MapView({ onSelectEvent }: MapViewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Map Area */}
         <div className="lg:col-span-2">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-border p-6 h-96 overflow-y-auto">
-            <div className="space-y-4">
-              <div className="text-center mb-6">
-                <p className="text-4xl mb-2">🗺️</p>
-                <p className="text-muted font-semibold">{events.length} Events Near You</p>
-              </div>
-
-              {/* Events List */}
-              <div className="space-y-3">
-                {events.map(event => (
-                  <button
-                    key={event.id}
-                    onClick={() => handleEventClick(event)}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                      selectedEvent?.id === event.id
-                        ? 'border-primary bg-white shadow-lg'
-                        : 'border-border bg-white hover:border-primary'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">{getSportEmoji(event.sportType)}</span>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground truncate">{event.title}</h3>
-                        <p className="text-sm text-muted truncate">📍 {event.location}</p>
-                        <p className="text-xs text-muted mt-1">
-                          {event.date} at {event.time}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2 text-xs">
-                          <span className="bg-primary/10 text-primary px-2 py-1 rounded">
-                            {event.currentParticipants}/{event.maxParticipants}
-                          </span>
-                          {event.skillLevel && (
-                            <span className="bg-surface text-muted px-2 py-1 rounded capitalize">
-                              {event.skillLevel}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+          <GoogleMapComponent
+            events={events}
+            onSelectEvent={(eventId) => {
+              const event = events.find(e => e.id === eventId)
+              if (event) handleEventClick(event)
+            }}
+            selectedEventId={selectedEvent?.id}
+          />
         </div>
 
         {/* Event Details Sidebar */}

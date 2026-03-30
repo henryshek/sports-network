@@ -95,7 +95,17 @@ export default function App() {
         {currentPage === 'home' && <Home user={user} onNavigate={setPageWrapper} />}
         {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} />}
         {currentPage === 'event-detail' && selectedEventId && (
-          <EventDetail eventId={selectedEventId} user={user} onBack={() => setCurrentPage('events')} />
+          <EventDetail
+            eventId={selectedEventId}
+            user={user}
+            onBack={() => setCurrentPage('events')}
+            onMessageOrganizer={(organizerId, organizerName) => {
+              // Create or open chat with organizer
+              console.log('Opening chat with:', organizerId, organizerName)
+              alert(`Opening chat with ${organizerName}...`)
+              setCurrentPage('messages')
+            }}
+          />
         )}
         {currentPage === 'create-event' && (
           <CreateEvent onBack={() => setCurrentPage('events')} user={user} onEventCreated={handleEventCreated} />

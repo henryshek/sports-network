@@ -6,6 +6,7 @@ interface EventDetailProps {
   eventId: string
   onBack: () => void
   user?: { id: string; name: string }
+  onMessageOrganizer?: (organizerId: string, organizerName: string) => void
 }
 
 interface UserProfile {
@@ -19,7 +20,7 @@ interface UserProfile {
   joinedDate: string
 }
 
-export default function EventDetail({ eventId, onBack }: EventDetailProps) {
+export default function EventDetail({ eventId, onBack, onMessageOrganizer }: EventDetailProps) {
   const [event, setEvent] = useState<Event | null>(null)
   const [isJoined, setIsJoined] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
@@ -216,7 +217,16 @@ export default function EventDetail({ eventId, onBack }: EventDetailProps) {
             >
               🎫 Reserve Spot
             </button>
-            <button className="px-6 py-3 rounded-lg font-semibold bg-surface border border-border text-foreground hover:bg-border transition">
+            <button
+              onClick={() => {
+                if (event.organizer && onMessageOrganizer) {
+                  onMessageOrganizer(event.organizer.id || 'user1', event.organizer.name)
+                } else if (event.organizer) {
+                  alert(`Message ${event.organizer.name} feature coming soon!`)
+                }
+              }}
+              className="px-6 py-3 rounded-lg font-semibold bg-surface border border-border text-foreground hover:bg-border transition"
+            >
               💬 Message Organizer
             </button>
           </div>
