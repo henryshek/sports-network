@@ -7,7 +7,7 @@ interface CreateEventProps {
   onEventCreated?: (event: any) => void
 }
 
-export default function CreateEvent({ onBack }: CreateEventProps) {
+export default function CreateEvent({ onBack, onEventCreated }: CreateEventProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -25,6 +25,31 @@ export default function CreateEvent({ onBack }: CreateEventProps) {
       alert('Please fill in all required fields')
       return
     }
+    
+    // Create new event object
+    const newEvent = {
+      id: `event_${Date.now()}`,
+      title: formData.title,
+      description: formData.description,
+      sportType: formData.sportType,
+      date: formData.date,
+      time: formData.time,
+      location: formData.location,
+      skillLevel: formData.skillLevel,
+      maxParticipants: formData.maxParticipants,
+      currentParticipants: 1,
+      participants: ['user1'],
+      organizerId: 'user1',
+      organizerName: 'John Doe',
+      reservedGuests: [],
+      waitlist: [],
+    }
+    
+    // Call the callback if provided
+    if (onEventCreated) {
+      onEventCreated(newEvent)
+    }
+    
     alert('Event created successfully!')
     onBack()
   }
@@ -114,14 +139,35 @@ export default function CreateEvent({ onBack }: CreateEventProps) {
           {/* Location */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">Location</label>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="e.g., Golden Gate Park, San Francisco"
-              required
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="e.g., Golden Gate Park, San Francisco"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (position) => {
+                        const { latitude, longitude } = position.coords
+                        setFormData({ ...formData, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` })
+                      },
+                      () => alert('Unable to get your location')
+                    )
+                  } else {
+                    alert('Geolocation is not supported')
+                  }
+                }}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition whitespace-nowrap"
+              >
+                📍 Use Current
+              </button>
+            </div>
           </div>
 
           {/* Skill Level and Max Participants */}

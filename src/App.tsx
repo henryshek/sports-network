@@ -9,9 +9,12 @@ import Clubs from './pages/Clubs'
 import ClubDetail from './pages/ClubDetail'
 import Messages from './pages/Messages'
 import Profile from './pages/Profile'
-import { LogOut, Home as HomeIcon, Calendar, Users, MessageSquare, User as UserIcon } from 'lucide-react'
+import MapView from './pages/MapView'
+import { LogOut, Home as HomeIcon, Calendar, Users, MessageSquare, User as UserIcon, Map } from 'lucide-react'
+import { mockEvents } from './mockData'
+import { Event } from './types'
 
-type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'club-detail' | 'messages' | 'profile'
+type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'club-detail' | 'messages' | 'profile' | 'map'
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
@@ -19,6 +22,7 @@ export default function App() {
   const setPageWrapper = (page: any) => setCurrentPage(page as Page)
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null)
+  const [events, setEvents] = useState<Event[]>(mockEvents)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -52,6 +56,10 @@ export default function App() {
   const navigateToClubDetail = (clubId: string) => {
     setSelectedClubId(clubId)
     setCurrentPage('club-detail')
+  }
+
+  const handleEventCreated = (newEvent: Event) => {
+    setEvents([...events, newEvent])
   }
 
   if (!user) {
@@ -90,8 +98,9 @@ export default function App() {
           <EventDetail eventId={selectedEventId} user={user} onBack={() => setCurrentPage('events')} />
         )}
         {currentPage === 'create-event' && (
-          <CreateEvent onBack={() => setCurrentPage('events')} user={user} />
+          <CreateEvent onBack={() => setCurrentPage('events')} user={user} onEventCreated={handleEventCreated} />
         )}
+        {currentPage === 'map' && <MapView onSelectEvent={navigateToEventDetail} />}
         {currentPage === 'clubs' && <Clubs onSelectClub={navigateToClubDetail} />}
         {currentPage === 'club-detail' && selectedClubId && (
           <ClubDetail clubId={selectedClubId} user={user} onBack={() => setCurrentPage('clubs')} />
@@ -146,6 +155,17 @@ export default function App() {
           >
             <MessageSquare size={24} />
             <span className="text-xs">Messages</span>
+          </button>
+          <button
+            onClick={() => setCurrentPage('map')}
+            className={`flex flex-col items-center gap-1 py-4 px-4 transition ${
+              currentPage === 'map'
+                ? 'text-primary border-t-2 border-primary'
+                : 'text-muted hover:text-foreground'
+            }`}
+          >
+            <Map size={24} />
+            <span className="text-xs">Map</span>
           </button>
           <button
             onClick={() => setCurrentPage('profile')}
