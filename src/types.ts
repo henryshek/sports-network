@@ -10,9 +10,12 @@ export interface User {
   email: string
   avatar?: string
   bio?: string
+  sports?: SportType[]
   sportInterests?: SportType[]
   skillLevel?: SkillLevel
-  createdAt: string
+  location?: string
+  joinedDate?: string
+  createdAt?: string
 }
 
 export interface Event {

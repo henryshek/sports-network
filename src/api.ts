@@ -84,7 +84,7 @@ export const messageApi = {
 
 // Auth - Mock implementation for demo
 export const authApi = {
-  login: async (email: string, password: string) => {
+  login: async (email: string, _password: string) => {
     // Mock login - accept any email/password combination
     const user = Object.values(mockUsers).find(u => u.email === email) || mockUsers['user1']
     return {
@@ -94,7 +94,7 @@ export const authApi = {
       },
     }
   },
-  register: async (name: string, email: string, password: string) => {
+  register: async (name: string, email: string, _password: string) => {
     // Mock registration - create a new user
     const newUserId = 'user-' + Date.now()
     const newUser: User = {
