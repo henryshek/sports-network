@@ -28,7 +28,10 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
   const [customSportName, setCustomSportName] = useState('')
   const [clubPhoto, setClubPhoto] = useState<string>('')
   const [backgroundPhoto, setBackgroundPhoto] = useState<string>('')
-  const [userClubs] = useState<string[]>(['club1'])
+  const [userClubs, setUserClubs] = useState<string[]>(() => {
+    const savedUserClubs = localStorage.getItem('userClubs')
+    return savedUserClubs ? JSON.parse(savedUserClubs) : ['club1']
+  })
   const [joinRequests, setJoinRequests] = useState<Record<string, string>>({})
 
   const topSports = TOP_SPORTS.map(s => s.toLowerCase())
@@ -78,9 +81,14 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       return
     }
     
+    // Add club to user's clubs
+    const updatedUserClubs = [...userClubs, clubId]
+    setUserClubs(updatedUserClubs)
+    localStorage.setItem('userClubs', JSON.stringify(updatedUserClubs))
+    
     const requestId = `req_${Date.now()}`
     setJoinRequests({ ...joinRequests, [clubId]: requestId })
-    alert(`Join request sent to ${clubName} admins. Waiting for approval...`)
+    alert(`You have successfully joined ${clubName}!`)
   }
 
 
