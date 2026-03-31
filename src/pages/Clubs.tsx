@@ -32,7 +32,6 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
     const savedUserClubs = localStorage.getItem('userClubs')
     return savedUserClubs ? JSON.parse(savedUserClubs) : ['club1']
   })
-  const [joinRequests, setJoinRequests] = useState<Record<string, string>>({})
 
   const topSports = TOP_SPORTS.map(s => s.toLowerCase())
 
@@ -76,18 +75,10 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
   }
 
   const handleJoinClub = (clubId: string, clubName: string) => {
-    if (joinRequests[clubId]) {
-      alert('You have already requested to join this club')
-      return
-    }
-    
     // Add club to user's clubs
     const updatedUserClubs = [...userClubs, clubId]
     setUserClubs(updatedUserClubs)
     localStorage.setItem('userClubs', JSON.stringify(updatedUserClubs))
-    
-    const requestId = `req_${Date.now()}`
-    setJoinRequests({ ...joinRequests, [clubId]: requestId })
     alert(`You have successfully joined ${clubName}!`)
   }
 
@@ -281,14 +272,7 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
                 >
                   View Club
                 </button>
-                {joinRequests[club.id] ? (
-                  <button
-                    disabled
-                    className="flex-1 bg-border text-muted py-2 rounded-lg font-semibold text-sm cursor-not-allowed opacity-60"
-                  >
-                    ⏳ Pending
-                  </button>
-                ) : userClubs.includes(club.id) ? (
+                {userClubs.includes(club.id) ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
