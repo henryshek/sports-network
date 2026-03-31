@@ -257,32 +257,40 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
               {/* Action Buttons */}
               <div className="flex gap-2 p-6 border-t border-border">
                 <button
-                  onClick={() => onSelectClub(club.id)}
-                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:opacity-90 transition font-semibold text-sm"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onSelectClub(club.id)
+                  }}
+                  className="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-primary/90 transition font-semibold text-sm"
                 >
                   View Club
                 </button>
                 {userClubs.includes(club.id) ? (
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation()
                       if (onCreateGroupChat) {
                         onCreateGroupChat(club.name)
                       }
+                      alert(`Opening chat for ${club.name}...`)
                     }}
-                    className="flex-1 bg-success text-white py-2 rounded-lg hover:opacity-90 transition font-semibold text-sm"
+                    className="flex-1 bg-success text-white py-2 rounded-lg hover:bg-success/90 transition font-semibold text-sm"
                   >
                     💬 Chat
                   </button>
                 ) : joinRequests[club.id] ? (
                   <button
                     disabled
-                    className="flex-1 bg-border text-muted py-2 rounded-lg font-semibold text-sm cursor-not-allowed"
+                    className="flex-1 bg-border text-muted py-2 rounded-lg font-semibold text-sm cursor-not-allowed opacity-60"
                   >
-                    Pending
+                    ⏳ Pending
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleJoinClub(club.id, club.name)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleJoinClub(club.id, club.name)
+                    }}
                     className="flex-1 bg-surface text-primary py-2 rounded-lg hover:bg-border transition font-semibold text-sm border border-primary"
                   >
                     Join

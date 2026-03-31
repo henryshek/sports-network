@@ -148,6 +148,8 @@ export interface GroupChat {
   updatedAt: string
 }
 
+
+
 export interface ClubChat {
   id: string
   clubId: string
