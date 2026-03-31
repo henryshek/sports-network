@@ -13,7 +13,10 @@ interface ClubsProps {
 export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSport, setSelectedSport] = useState<string>('')
-  const [clubs, setClubs] = useState<Club[]>(mockClubs)
+  const [clubs, setClubs] = useState<Club[]>(() => {
+    const savedClubs = localStorage.getItem('clubs')
+    return savedClubs ? JSON.parse(savedClubs) : mockClubs
+  })
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -137,7 +140,11 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       creatorId: 'user1',
     }
 
-    setClubs([...clubs, newClub])
+    const updatedClubs = [...clubs, newClub]
+    setClubs(updatedClubs)
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('clubs', JSON.stringify(updatedClubs))
     
     // Automatically create a group chat for the club
     if (onCreateGroupChat) {
