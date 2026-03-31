@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { mockUsers } from '@/mockData'
 import { User } from '@/types'
 
@@ -22,11 +22,12 @@ interface ChatRoom {
 
 interface MessagesProps {
   user?: User
+  selectedClubChatId?: string | null
 }
 
 type MessageTab = 'all' | 'individual' | 'group' | 'announcement'
 
-export default function Messages({}: MessagesProps) {
+export default function Messages({ user, selectedClubChatId }: MessagesProps) {
   const [chats, setChats] = useState<ChatRoom[]>([
     {
       id: 'chat_1',
@@ -69,6 +70,27 @@ export default function Messages({}: MessagesProps) {
   const [messageText, setMessageText] = useState('')
   const [showNewChat, setShowNewChat] = useState(false)
   const [activeTab, setActiveTab] = useState<MessageTab>('all')
+
+  useEffect(() => {
+    if (selectedClubChatId) {
+      const clubChat = chats.find(c => c.id === selectedClubChatId)
+      if (clubChat) {
+        setSelectedChat(clubChat)
+      } else {
+        // If club chat doesn't exist, create it
+        const newClubChat: ChatRoom = {
+          id: selectedClubChatId,
+          type: 'group',
+          participantName: `Club Chat ${selectedClubChatId}`,
+          groupMembers: user ? [user.id] : [],
+          messages: [],
+          isGroup: true,
+        }
+        setChats([...chats, newClubChat])
+        setSelectedChat(newClubChat)
+      }
+    }
+  }, [selectedClubChatId, chats, user])
 
   const filteredChats = chats.filter(chat => {
     if (activeTab === 'all') return true

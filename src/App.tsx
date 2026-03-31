@@ -24,6 +24,7 @@ export default function App() {
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null)
   const [selectedClub, setSelectedClub] = useState<Club | null>(null)
   const [events, setEvents] = useState<Event[]>(mockEvents)
+  const [selectedClubChatId, setSelectedClubChatId] = useState<string | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -120,7 +121,7 @@ export default function App() {
             onBack={() => setCurrentPage('clubs')}
             onClubChat={(clubId, clubName) => {
               console.log('Opening club chat:', clubId, clubName)
-              alert(`Opening chat for ${clubName}...`)
+              setSelectedClubChatId(clubId)
               setCurrentPage('messages')
             }}
           />
@@ -136,7 +137,7 @@ export default function App() {
             }}
           />
         )}
-        {currentPage === 'messages' && <Messages user={user} />}
+        {currentPage === 'messages' && <Messages user={user} selectedClubChatId={selectedClubChatId} />}
         {currentPage === 'profile' && <Profile user={user} onLogout={handleLogout} />}
       </main>
 
@@ -144,7 +145,12 @@ export default function App() {
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-around">
           <button
-            onClick={() => setCurrentPage('home')}
+            onClick={() => {
+              setCurrentPage('home')
+              setSelectedEventId(null)
+              setSelectedClubId(null)
+              setSelectedClub(null)
+            }}
             className={`flex flex-col items-center gap-1 py-4 px-4 transition ${
               currentPage === 'home'
                 ? 'text-primary border-t-2 border-primary'
