@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { mockClubs } from '@/mockData'
+import { mockClubs, mockEvents } from '@/mockData'
 import { Club } from '@/types'
 import { TOP_SPORTS, isTopSport } from '@/constants/sports'
+import WeeklyEventsTimeline from '@/components/WeeklyEventsTimeline'
 
 interface ClubsProps {
   onSelectClub: (clubId: string) => void
@@ -437,6 +438,11 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
           </div>
         </div>
       )}
+
+      {/* Weekly Events Timeline */}
+      <div className="mt-12">
+        <WeeklyEventsTimeline events={mockEvents} onSelectEvent={(event) => console.log('Selected event:', event)} />
+      </div>
     </div>
   )
 }

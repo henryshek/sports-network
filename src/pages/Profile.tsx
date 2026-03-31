@@ -1,15 +1,23 @@
 import { useState } from 'react'
 import { User } from '@/types'
-import { Mail, MapPin, Trophy, Users, LogOut, Camera } from 'lucide-react'
+import { Mail, MapPin, Trophy, Users, LogOut, Camera, Shield, Heart } from 'lucide-react'
+import { mockClubs } from '@/mockData'
 
 interface ProfileProps {
   user: User
   onLogout: () => void
+  onSelectClub?: (clubId: string) => void
 }
 
-export default function Profile({ user, onLogout }: ProfileProps) {
+export default function Profile({ user, onLogout, onSelectClub }: ProfileProps) {
   const [profilePicture, setProfilePicture] = useState<string>(user.profilePicture || '')
   const [previewImage, setPreviewImage] = useState<string | null>(null)
+
+  // Get clubs where user is admin
+  const adminClubs = mockClubs.filter(club => club.admins.includes(user.id))
+  
+  // Get clubs where user is member but not admin
+  const memberClubs = mockClubs.filter(club => club.members.includes(user.id) && !club.admins.includes(user.id))
 
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -24,6 +32,24 @@ export default function Profile({ user, onLogout }: ProfileProps) {
       }
       reader.readAsDataURL(file)
     }
+  }
+
+  const getSportEmoji = (sport: string) => {
+    const emojis: Record<string, string> = {
+      basketball: '🏀',
+      soccer: '⚽',
+      tennis: '🎾',
+      volleyball: '🏐',
+      badminton: '🏸',
+      cricket: '🏏',
+      baseball: '⚾',
+      running: '🏃',
+      cycling: '🚴',
+      swimming: '🏊',
+      yoga: '🧘',
+      pickleball: '🏓',
+    }
+    return emojis[sport.toLowerCase()] || '⚽'
   }
 
   return (
@@ -78,7 +104,7 @@ export default function Profile({ user, onLogout }: ProfileProps) {
       <div className="grid md:grid-cols-3 gap-4 mb-8">
         {[
           { icon: Trophy, label: 'Events Joined', value: user.totalActivitiesParticipated || '0' },
-          { icon: Users, label: 'Clubs', value: '5' },
+          { icon: Users, label: 'Clubs', value: (adminClubs.length + memberClubs.length).toString() },
           { icon: MapPin, label: 'Location', value: user.location || 'Not Set' }
         ].map((stat, i) => {
           const Icon = stat.icon
@@ -134,6 +160,66 @@ export default function Profile({ user, onLogout }: ProfileProps) {
                     <p className="font-semibold text-foreground">⭐ {stat.averageRating.toFixed(1)}</p>
                   </div>
                 )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Admin Clubs */}
+      {adminClubs.length > 0 && (
+        <div className="bg-surface rounded-xl p-6 border border-border mb-8">
+          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <Shield size={20} className="text-error" />
+            Clubs I Admin ({adminClubs.length})
+          </h2>
+          <div className="space-y-3">
+            {adminClubs.map(club => (
+              <div
+                key={club.id}
+                onClick={() => onSelectClub?.(club.id)}
+                className="p-4 bg-error/5 border border-error/20 rounded-lg hover:bg-error/10 transition cursor-pointer flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{getSportEmoji(club.sport)}</span>
+                  <div>
+                    <p className="font-semibold text-foreground">{club.name}</p>
+                    <p className="text-sm text-muted">{club.members.length} members</p>
+                  </div>
+                </div>
+                <span className="text-error font-semibold flex items-center gap-1">
+                  <Shield size={16} /> Admin
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Member Clubs */}
+      {memberClubs.length > 0 && (
+        <div className="bg-surface rounded-xl p-6 border border-border mb-8">
+          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+            <Heart size={20} className="text-success" />
+            Clubs I'm a Member ({memberClubs.length})
+          </h2>
+          <div className="space-y-3">
+            {memberClubs.map(club => (
+              <div
+                key={club.id}
+                onClick={() => onSelectClub?.(club.id)}
+                className="p-4 bg-success/5 border border-success/20 rounded-lg hover:bg-success/10 transition cursor-pointer flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{getSportEmoji(club.sport)}</span>
+                  <div>
+                    <p className="font-semibold text-foreground">{club.name}</p>
+                    <p className="text-sm text-muted">{club.members.length} members</p>
+                  </div>
+                </div>
+                <span className="text-success font-semibold flex items-center gap-1">
+                  <Heart size={16} /> Member
+                </span>
               </div>
             ))}
           </div>
