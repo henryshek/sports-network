@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { mockClubs, mockUsers } from '@/mockData'
+import { mockClubs, mockUsers, mockEvents } from '@/mockData'
 import { Club, User, Announcement } from '@/types'
 import { Send, Bell, Settings } from 'lucide-react'
+import ClubEventsTimeline from '@/components/ClubEventsTimeline'
 
 
 interface ClubDetailProps {
@@ -314,7 +315,8 @@ export default function ClubDetail({ clubId, user, onBack, onClubChat, onOpenSet
         </div>
       </div>
 
-
+      {/* Club Events Timeline */}
+      <ClubEventsTimeline club={club} allEvents={mockEvents} />
     </div>
   )
 }
