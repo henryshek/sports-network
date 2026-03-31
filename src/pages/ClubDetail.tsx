@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { mockClubs, mockUsers } from '@/mockData'
 import { Club, User, Announcement } from '@/types'
 import { Send, Bell, Settings } from 'lucide-react'
-import WeeklyEventsTimelineForClub from '@/components/WeeklyEventsTimelineForClub'
+
 
 interface ClubDetailProps {
   clubId: string
@@ -314,8 +314,7 @@ export default function ClubDetail({ clubId, user, onBack, onClubChat, onOpenSet
         </div>
       </div>
 
-      {/* Weekly Events Timeline */}
-      <WeeklyEventsTimelineForClub club={club} />
+
     </div>
   )
 }

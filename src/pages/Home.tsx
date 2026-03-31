@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { User, Event } from '@/types'
-import { Zap, TrendingUp } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import { mockEvents } from '@/mockData'
 
 interface HomeProps {
@@ -39,35 +39,7 @@ export default function Home({ user }: HomeProps) {
     setSelectedDateEvents(eventsForDate)
   }, [selectedDate])
 
-  const activities = [
-    {
-      id: '1',
-      type: 'event_created',
-      user: 'John Smith',
-      action: 'created a new event',
-      target: 'Basketball Game at Victoria Park',
-      time: '2 hours ago',
-      icon: '🏀'
-    },
-    {
-      id: '2',
-      type: 'joined_event',
-      user: 'Sarah Johnson',
-      action: 'joined',
-      target: 'Tennis Match at Hong Kong Tennis Centre',
-      time: '4 hours ago',
-      icon: '🎾'
-    },
-    {
-      id: '3',
-      type: 'club_created',
-      user: 'Mike Chen',
-      action: 'created a new club',
-      target: 'Soccer Enthusiasts',
-      time: '1 day ago',
-      icon: '⚽'
-    },
-  ]
+
 
   const quickAccessItems = [
     { id: 'events', label: 'Events', icon: '📅', color: 'bg-blue-100 text-blue-600', description: 'Find & join events' },
@@ -261,72 +233,7 @@ export default function Home({ user }: HomeProps) {
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-1 bg-surface rounded-full"></div>
 
-      {/* Activity Timeline */}
-      <div>
-        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          <TrendingUp size={24} className="text-primary" />
-          Activity Timeline
-        </h2>
-        
-        <div className="space-y-4">
-          {activities.map((activity, index) => (
-            <div key={activity.id} className="flex gap-4">
-              {/* Timeline Line */}
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-2xl border-2 border-primary/20">
-                  {activity.icon}
-                </div>
-                {index < activities.length - 1 && (
-                  <div className="w-1 h-16 bg-gradient-to-b from-primary/30 to-transparent mt-2"></div>
-                )}
-              </div>
-
-              {/* Activity Content */}
-              <div className="flex-1 pt-2 pb-4">
-                <div className="bg-white rounded-lg p-4 border border-border hover:shadow-md transition">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {activity.user}
-                      </p>
-                      <p className="text-sm text-muted">
-                        {activity.action}
-                      </p>
-                    </div>
-                    <span className="text-xs text-muted whitespace-nowrap ml-2 font-medium">
-                      {activity.time}
-                    </span>
-                  </div>
-                  
-                  <p className="text-sm font-medium text-primary bg-primary/5 px-3 py-2 rounded inline-block mb-3">
-                    {activity.target}
-                  </p>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2">
-                    <button className="text-xs px-4 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition font-semibold">
-                      View
-                    </button>
-                    <button className="text-xs px-4 py-1.5 rounded-lg bg-surface text-foreground hover:bg-border transition font-semibold">
-                      Follow
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Load More Button */}
-        <div className="mt-8 text-center">
-          <button className="px-8 py-3 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition font-semibold text-sm">
-            Load More Activities
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
