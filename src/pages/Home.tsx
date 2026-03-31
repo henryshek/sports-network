@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { User, Event } from '@/types'
-import { Zap, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Zap, TrendingUp } from 'lucide-react'
 import { mockEvents } from '@/mockData'
 
 interface HomeProps {
