@@ -273,7 +273,14 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
                 >
                   View Club
                 </button>
-                {userClubs.includes(club.id) ? (
+                {joinRequests[club.id] ? (
+                  <button
+                    disabled
+                    className="flex-1 bg-border text-muted py-2 rounded-lg font-semibold text-sm cursor-not-allowed opacity-60"
+                  >
+                    ⏳ Pending
+                  </button>
+                ) : userClubs.includes(club.id) ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
@@ -285,13 +292,6 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
                     className="flex-1 bg-success text-white py-2 rounded-lg hover:bg-success/90 transition font-semibold text-sm"
                   >
                     💬 Chat
-                  </button>
-                ) : joinRequests[club.id] ? (
-                  <button
-                    disabled
-                    className="flex-1 bg-border text-muted py-2 rounded-lg font-semibold text-sm cursor-not-allowed opacity-60"
-                  >
-                    ⏳ Pending
                   </button>
                 ) : (
                   <button
