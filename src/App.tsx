@@ -95,7 +95,16 @@ export default function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentPage === 'home' && <Home user={user} />}
+        {currentPage === 'home' && <Home user={user} onNavigate={(page) => {
+          if (page === 'events') setCurrentPage('events')
+          else if (page === 'clubs') setCurrentPage('clubs')
+          else if (page === 'map') setCurrentPage('map')
+          else if (page === 'messages') setCurrentPage('messages')
+          else if (page === 'profile') setCurrentPage('profile')
+          else if (page === 'trending') alert('Trending page coming soon')
+          else if (page === 'saved') alert('Saved page coming soon')
+          else if (page === 'nearby') alert('Nearby page coming soon')
+        }} />}
         {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} />}
         {currentPage === 'event-detail' && selectedEventId && (
           <EventDetail

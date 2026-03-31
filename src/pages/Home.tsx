@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { User, Event } from '@/types'
 import { Zap } from 'lucide-react'
 import { mockEvents } from '@/mockData'
 
 interface HomeProps {
   user: User
+  onNavigate?: (page: string) => void
 }
 
-export default function Home({ user }: HomeProps) {
+export default function Home({ user, onNavigate }: HomeProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [twoWeekDates, setTwoWeekDates] = useState<Date[]>([])
   const [selectedDateEvents, setSelectedDateEvents] = useState<Event[]>([])
+  const calendarRef = useRef<HTMLDivElement>(null)
 
   // Initialize 2-week dates
   useEffect(() => {
@@ -23,6 +25,18 @@ export default function Home({ user }: HomeProps) {
     }
     setTwoWeekDates(dates)
   }, [])
+
+  // Auto-scroll calendar to today's date
+  useEffect(() => {
+    if (calendarRef.current && twoWeekDates.length > 0) {
+      setTimeout(() => {
+        const todayButton = calendarRef.current?.querySelector('[data-is-today="true"]') as HTMLElement
+        if (todayButton) {
+          todayButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+        }
+      }, 100)
+    }
+  }, [twoWeekDates])
 
   // Update events when selected date changes
   useEffect(() => {
@@ -117,15 +131,23 @@ export default function Home({ user }: HomeProps) {
         {/* Horizontal Scrollable Container */}
         <div className="overflow-x-auto pb-2 -mx-8 px-8">
           <div className="flex gap-4 min-w-min">
-            {quickAccessItems.map((item) => (
-              <button
-                key={item.id}
-                className={`flex flex-col items-center justify-center w-24 h-24 rounded-xl ${item.color} hover:shadow-lg transition flex-shrink-0 font-medium`}
-              >
-                <span className="text-4xl mb-1">{item.icon}</span>
-                <span className="text-xs font-semibold text-center line-clamp-1">{item.label}</span>
-              </button>
-            ))}
+            {quickAccessItems.map((item) => {
+              const handleClick = () => {
+                if (onNavigate) {
+                  onNavigate(item.id)
+                }
+              }
+              return (
+                <button
+                  key={item.id}
+                  onClick={handleClick}
+                  className={`flex flex-col items-center justify-center w-24 h-24 rounded-xl ${item.color} hover:shadow-lg transition flex-shrink-0 font-medium`}
+                >
+                  <span className="text-4xl mb-1">{item.icon}</span>
+                  <span className="text-xs font-semibold text-center line-clamp-1">{item.label}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -141,12 +163,13 @@ export default function Home({ user }: HomeProps) {
 
         {/* 2-Week Scrollable Calendar */}
         <div className="bg-white rounded-lg border border-border p-4 mb-6">
-          <div className="overflow-x-auto pb-2">
+          <div className="overflow-x-auto pb-2" ref={calendarRef}>
             <div className="flex gap-2 min-w-min">
               {twoWeekDates.map((date, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedDate(date)}
+                  data-is-today={isToday(date) ? 'true' : 'false'}
                   className={`flex flex-col items-center justify-center px-3 py-3 rounded-lg transition flex-shrink-0 min-w-max ${
                     isSelected(date)
                       ? 'bg-primary text-white border-2 border-primary'
