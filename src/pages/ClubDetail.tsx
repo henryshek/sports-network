@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { mockClubs, mockUsers } from '@/mockData'
-import { Club, User, Announcement } from '@/types'
-import { Send, Bell, Settings } from 'lucide-react'
+import { mockClubs, mockUsers, mockEvents } from '@/mockData'
+import { Club, User, Announcement, Event } from '@/types'
+import { Send, Bell, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
+import WeeklyEventsTimelineForClub from '@/components/WeeklyEventsTimelineForClub'
 
 interface ClubDetailProps {
   clubId: string
@@ -313,25 +314,8 @@ export default function ClubDetail({ clubId, user, onBack, onClubChat, onOpenSet
         </div>
       </div>
 
-      {/* Events */}
-      {club.events && club.events.length > 0 && (
-        <div className="bg-white rounded-lg border border-border p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Club Events ({club.events.length})</h2>
-          <div className="space-y-3">
-            {club.events.map(event => (
-              <div key={event.id} className="p-4 bg-surface rounded-lg border border-border">
-                <h3 className="font-semibold text-foreground">{event.title}</h3>
-                <p className="text-sm text-muted mt-1">
-                  📅 {event.date} at {event.time}
-                </p>
-                <p className="text-sm text-muted">
-                  📍 {event.location}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Weekly Events Timeline */}
+      <WeeklyEventsTimelineForClub club={club} />
     </div>
   )
 }

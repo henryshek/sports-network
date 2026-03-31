@@ -1,11 +1,44 @@
-import { User } from '@/types'
-import { Zap, TrendingUp } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { User, Event } from '@/types'
+import { Zap, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react'
+import { mockEvents } from '@/mockData'
 
 interface HomeProps {
   user: User
 }
 
 export default function Home({ user }: HomeProps) {
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [twoWeekDates, setTwoWeekDates] = useState<Date[]>([])
+  const [selectedDateEvents, setSelectedDateEvents] = useState<Event[]>([])
+
+  // Initialize 2-week dates
+  useEffect(() => {
+    const dates: Date[] = []
+    const today = new Date()
+    for (let i = 0; i < 14; i++) {
+      const date = new Date(today)
+      date.setDate(date.getDate() + i)
+      dates.push(date)
+    }
+    setTwoWeekDates(dates)
+  }, [])
+
+  // Update events when selected date changes
+  useEffect(() => {
+    const eventsForDate = mockEvents.filter(event => {
+      const eventDate = new Date(event.date)
+      return (
+        eventDate.getDate() === selectedDate.getDate() &&
+        eventDate.getMonth() === selectedDate.getMonth() &&
+        eventDate.getFullYear() === selectedDate.getFullYear()
+      )
+    })
+    // Sort by time
+    eventsForDate.sort((a, b) => a.time.localeCompare(b.time))
+    setSelectedDateEvents(eventsForDate)
+  }, [selectedDate])
+
   const activities = [
     {
       id: '1',
@@ -34,33 +67,6 @@ export default function Home({ user }: HomeProps) {
       time: '1 day ago',
       icon: '⚽'
     },
-    {
-      id: '4',
-      type: 'event_completed',
-      user: 'Emma Wilson',
-      action: 'completed',
-      target: 'Volleyball Tournament at Repulse Bay Beach',
-      time: '2 days ago',
-      icon: '🏐'
-    },
-    {
-      id: '5',
-      type: 'joined_club',
-      user: 'David Lee',
-      action: 'joined',
-      target: 'Badminton Club',
-      time: '3 days ago',
-      icon: '🏸'
-    },
-    {
-      id: '6',
-      type: 'event_created',
-      user: 'Lisa Wong',
-      action: 'created a new event',
-      target: 'Running Group - Morning Jog',
-      time: '4 days ago',
-      icon: '🏃'
-    },
   ]
 
   const quickAccessItems = [
@@ -73,6 +79,53 @@ export default function Home({ user }: HomeProps) {
     { id: 'saved', label: 'Saved', icon: '⭐', color: 'bg-yellow-100 text-yellow-600', description: 'Bookmarks' },
     { id: 'nearby', label: 'Nearby', icon: '📍', color: 'bg-indigo-100 text-indigo-600', description: 'Around you' },
   ]
+
+  const getSportEmoji = (sport: string) => {
+    const emojis: Record<string, string> = {
+      basketball: '🏀',
+      soccer: '⚽',
+      tennis: '🎾',
+      volleyball: '🏐',
+      badminton: '🏸',
+      cricket: '🏏',
+      baseball: '⚾',
+      running: '🏃',
+      cycling: '🚴',
+      swimming: '🏊',
+      yoga: '🧘',
+      pickleball: '🏓',
+    }
+    return emojis[sport.toLowerCase()] || '⚽'
+  }
+
+  const isToday = (date: Date) => {
+    const today = new Date()
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    )
+  }
+
+  const isSelected = (date: Date) => {
+    return (
+      date.getDate() === selectedDate.getDate() &&
+      date.getMonth() === selectedDate.getMonth() &&
+      date.getFullYear() === selectedDate.getFullYear()
+    )
+  }
+
+  const formatDateShort = (date: Date) => {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
+  const formatDateFull = (date: Date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+  }
+
+  const getDayName = (date: Date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'short' })
+  }
 
   return (
     <div className="space-y-8 pb-20">
@@ -102,6 +155,109 @@ export default function Home({ user }: HomeProps) {
               </button>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="h-1 bg-surface rounded-full"></div>
+
+      {/* 2-Week Calendar and Events Timeline */}
+      <div>
+        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+          📅 Upcoming Events
+        </h2>
+
+        {/* 2-Week Scrollable Calendar */}
+        <div className="bg-white rounded-lg border border-border p-4 mb-6">
+          <div className="overflow-x-auto pb-2">
+            <div className="flex gap-2 min-w-min">
+              {twoWeekDates.map((date, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedDate(date)}
+                  className={`flex flex-col items-center justify-center px-3 py-3 rounded-lg transition flex-shrink-0 min-w-max ${
+                    isSelected(date)
+                      ? 'bg-primary text-white border-2 border-primary'
+                      : isToday(date)
+                      ? 'bg-primary/10 border-2 border-primary text-primary'
+                      : 'bg-surface border-2 border-border hover:border-primary'
+                  }`}
+                >
+                  <span className="text-xs font-semibold">{getDayName(date)}</span>
+                  <span className="text-sm font-bold mt-1">{date.getDate()}</span>
+                  <span className="text-xs text-muted mt-0.5">{date.toLocaleDateString('en-US', { month: 'short' })}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Selected Date Events - Time-based List */}
+        <div className="bg-white rounded-lg border border-border p-6">
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-foreground">
+              {formatDateFull(selectedDate)}
+            </h3>
+            <p className="text-sm text-muted mt-1">
+              {selectedDateEvents.length} event{selectedDateEvents.length !== 1 ? 's' : ''} scheduled
+            </p>
+          </div>
+
+          {selectedDateEvents.length > 0 ? (
+            <div className="space-y-4">
+              {selectedDateEvents.map((event) => (
+                <div key={event.id} className="flex gap-4 pb-4 border-b border-border last:border-b-0 last:pb-0">
+                  {/* Time */}
+                  <div className="flex flex-col items-center min-w-max">
+                    <div className="text-lg font-bold text-primary">{event.time}</div>
+                    <div className="w-1 h-12 bg-primary/20 rounded-full mt-2"></div>
+                  </div>
+
+                  {/* Event Details */}
+                  <div className="flex-1 pt-1">
+                    <div className="flex items-start gap-3 mb-2">
+                      <span className="text-2xl">{getSportEmoji(event.sportType)}</span>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground">{event.title}</h4>
+                        <p className="text-sm text-muted mt-1">{event.location}</p>
+                      </div>
+                    </div>
+
+                    {/* Event Info */}
+                    <div className="flex flex-wrap gap-3 mt-3">
+                      <div className="flex items-center gap-1 text-xs bg-surface px-2 py-1 rounded">
+                        <span>👥</span>
+                        <span>{event.currentParticipants}/{event.maxParticipants}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs bg-surface px-2 py-1 rounded">
+                        <span>📊</span>
+                        <span className="capitalize">{event.skillLevel}</span>
+                      </div>
+                      {event.currentParticipants >= event.maxParticipants && (
+                        <div className="flex items-center gap-1 text-xs bg-warning/10 text-warning px-2 py-1 rounded">
+                          <span>⚠️</span>
+                          <span>Full</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Button */}
+                    <button className="mt-3 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition font-semibold">
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-3xl mb-3">📭</p>
+              <p className="text-muted">No events scheduled for {formatDateShort(selectedDate)}</p>
+              <button className="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition font-semibold text-sm">
+                Create Event
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
