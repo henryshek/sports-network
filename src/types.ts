@@ -75,6 +75,7 @@ export interface Club {
   creator?: User
   members: string[]
   admins: string[]
+  organizers: string[] // Club organizers with edit permissions
   isPrivate: boolean
   clubPhoto?: string // Club photo/icon URL
   backgroundPhoto?: string // Club background photo URL
@@ -84,6 +85,7 @@ export interface Club {
   announcements?: Announcement[]
   invitations?: Invitation[]
   membershipRequests?: ClubMembershipRequest[] // Pending join requests
+  groupChatId?: string // Auto-created group chat for club members
 }
 
 export interface Announcement {

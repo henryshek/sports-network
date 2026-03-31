@@ -117,6 +117,8 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       backgroundPhoto: backgroundPhoto,
       members: ['user1'],
       admins: ['user1'],
+      organizers: ['user1'],
+      groupChatId: `chat_${Date.now()}`,
       creator: {
         id: 'user1',
         name: 'You',
@@ -128,6 +130,7 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
         joinedDate: new Date().toISOString(),
       },
       events: [],
+      membershipRequests: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       creatorId: 'user1',

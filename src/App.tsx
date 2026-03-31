@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { User } from './types'
+import { User, Club } from './types'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Events from './pages/Events'
@@ -7,6 +7,7 @@ import EventDetail from './pages/EventDetail'
 import CreateEvent from './pages/CreateEvent'
 import Clubs from './pages/Clubs'
 import ClubDetail from './pages/ClubDetail'
+import ClubSettings from './pages/ClubSettings'
 import Messages from './pages/Messages'
 import Profile from './pages/Profile'
 import MapView from './pages/MapView'
@@ -14,13 +15,14 @@ import { LogOut, Home as HomeIcon, Calendar, Users, MessageSquare, User as UserI
 import { mockEvents } from './mockData'
 import { Event } from './types'
 
-type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'club-detail' | 'messages' | 'profile' | 'map'
+type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'club-detail' | 'club-settings' | 'messages' | 'profile' | 'map'
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
   const [currentPage, setCurrentPage] = useState<Page>('home')
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null)
+  const [selectedClub, setSelectedClub] = useState<Club | null>(null)
   const [events, setEvents] = useState<Event[]>(mockEvents)
 
   useEffect(() => {
@@ -120,6 +122,17 @@ export default function App() {
               console.log('Opening club chat:', clubId, clubName)
               alert(`Opening chat for ${clubName}...`)
               setCurrentPage('messages')
+            }}
+          />
+        )}
+        {currentPage === 'club-settings' && selectedClub && (
+          <ClubSettings
+            club={selectedClub}
+            user={user}
+            onBack={() => setCurrentPage('club-detail')}
+            onUpdateClub={(updatedClub) => {
+              setSelectedClub(updatedClub)
+              alert('Club settings updated successfully!')
             }}
           />
         )}
