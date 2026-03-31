@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { mockClubs, mockUsers, mockEvents } from '@/mockData'
-import { Club, User, Announcement, Event } from '@/types'
-import { Send, Bell, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
+import { mockClubs, mockUsers } from '@/mockData'
+import { Club, User, Announcement } from '@/types'
+import { Send, Bell, Settings } from 'lucide-react'
 import WeeklyEventsTimelineForClub from '@/components/WeeklyEventsTimelineForClub'
 
 interface ClubDetailProps {

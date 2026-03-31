@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Club, Event } from '@/types'
+import { Club } from '@/types'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { mockEvents } from '@/mockData'
 
