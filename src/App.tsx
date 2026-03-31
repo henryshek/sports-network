@@ -25,6 +25,7 @@ export default function App() {
   const [selectedClub, setSelectedClub] = useState<Club | null>(null)
   const [events, setEvents] = useState<Event[]>(mockEvents)
   const [selectedClubChatId, setSelectedClubChatId] = useState<string | null>(null)
+  const [selectedClubChatName, setSelectedClubChatName] = useState<string | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -122,6 +123,7 @@ export default function App() {
             onClubChat={(clubId, clubName) => {
               console.log('Opening club chat:', clubId, clubName)
               setSelectedClubChatId(clubId)
+              setSelectedClubChatName(clubName)
               setCurrentPage('messages')
             }}
           />
@@ -137,7 +139,7 @@ export default function App() {
             }}
           />
         )}
-        {currentPage === 'messages' && <Messages user={user} selectedClubChatId={selectedClubChatId} />}
+        {currentPage === 'messages' && <Messages user={user} selectedClubChatId={selectedClubChatId} selectedClubChatName={selectedClubChatName} />}
         {currentPage === 'profile' && <Profile user={user} onLogout={handleLogout} />}
       </main>
 

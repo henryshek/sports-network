@@ -23,11 +23,12 @@ interface ChatRoom {
 interface MessagesProps {
   user?: User
   selectedClubChatId?: string | null
+  selectedClubChatName?: string | null
 }
 
 type MessageTab = 'all' | 'individual' | 'group' | 'announcement'
 
-export default function Messages({ user, selectedClubChatId }: MessagesProps) {
+export default function Messages({ user, selectedClubChatId, selectedClubChatName }: MessagesProps) {
   const [chats, setChats] = useState<ChatRoom[]>([
     {
       id: 'chat_1',
@@ -81,7 +82,7 @@ export default function Messages({ user, selectedClubChatId }: MessagesProps) {
         const newClubChat: ChatRoom = {
           id: selectedClubChatId,
           type: 'group',
-          participantName: `Club Chat ${selectedClubChatId}`,
+          participantName: selectedClubChatName || `Club Chat ${selectedClubChatId}`,
           groupMembers: user ? [user.id] : [],
           messages: [],
           isGroup: true,
@@ -90,7 +91,7 @@ export default function Messages({ user, selectedClubChatId }: MessagesProps) {
         setSelectedChat(newClubChat)
       }
     }
-  }, [selectedClubChatId, chats, user])
+  }, [selectedClubChatId, selectedClubChatName, chats, user])
 
   const filteredChats = chats.filter(chat => {
     if (activeTab === 'all') return true
