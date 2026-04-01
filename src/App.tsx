@@ -116,6 +116,7 @@ export default function App() {
             onBack={() => setCurrentPage('events')}
             onMessageOrganizer={(organizerId, organizerName) => {
               // Create or open chat with organizer
+              console.log('onMessageOrganizer called:', organizerId, organizerName)
               setSelectedIndividualChatId(`chat_${organizerId}`)
               setSelectedIndividualChatName(organizerName)
               setSelectedIndividualChatUserId(organizerId)
@@ -134,10 +135,11 @@ export default function App() {
             user={user}
             onBack={() => setCurrentPage('clubs')}
             onClubChat={(clubId, clubName) => {
-              console.log('Opening club chat:', clubId, clubName)
+              console.log('onClubChat called:', clubId, clubName)
               setSelectedClubChatId(clubId)
               setSelectedClubChatName(clubName)
               setCurrentPage('messages')
+              console.log('State after setting:', { clubId, clubName })
             }}
           />
         )}
