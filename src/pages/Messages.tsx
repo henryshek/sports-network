@@ -97,7 +97,7 @@ export default function Messages({
           messages: [],
           isGroup: true,
         }
-        setChats([...chats, newClubChat])
+        setChats(prev => [...prev, newClubChat])
         setSelectedChat(newClubChat)
       }
     } else if (selectedIndividualChatId) {
@@ -114,11 +114,11 @@ export default function Messages({
           participantName: selectedIndividualChatName || 'Unknown User',
           messages: [],
         }
-        setChats([...chats, newIndividualChat])
+        setChats(prev => [...prev, newIndividualChat])
         setSelectedChat(newIndividualChat)
       }
     }
-  }, [selectedClubChatId, selectedClubChatName, selectedIndividualChatId, selectedIndividualChatName, selectedIndividualChatUserId, chats, user])
+  }, [selectedClubChatId, selectedClubChatName, selectedIndividualChatId, selectedIndividualChatName, selectedIndividualChatUserId])
 
   const filteredChats = chats.filter(chat => {
     if (activeTab === 'all') return true
