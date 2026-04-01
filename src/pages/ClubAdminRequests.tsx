@@ -65,6 +65,22 @@ export function ClubAdminRequestsPage({ onBack }: ClubAdminRequestsProps) {
       req.id === requestId ? { ...req, status: 'approved' as const } : req
     );
     saveRequests(updatedRequests);
+
+    // Add user to club members
+    const request = joinRequests.find((r) => r.id === requestId);
+    if (request) {
+      const clubs = JSON.parse(localStorage.getItem('clubs') || '[]');
+      const updatedClubs = clubs.map((club: any) => {
+        if (club.id === request.clubId && !club.members.includes(request.userId)) {
+          return {
+            ...club,
+            members: [...club.members, request.userId],
+          };
+        }
+        return club;
+      });
+      localStorage.setItem('clubs', JSON.stringify(updatedClubs));
+    }
   };
 
   const handleReject = (requestId: string) => {
