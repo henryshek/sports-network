@@ -24,11 +24,21 @@ interface MessagesProps {
   user?: User
   selectedClubChatId?: string | null
   selectedClubChatName?: string | null
+  selectedIndividualChatId?: string | null
+  selectedIndividualChatName?: string | null
+  selectedIndividualChatUserId?: string | null
 }
 
 type MessageTab = 'all' | 'individual' | 'group' | 'announcement'
 
-export default function Messages({ user, selectedClubChatId, selectedClubChatName }: MessagesProps) {
+export default function Messages({
+  user,
+  selectedClubChatId,
+  selectedClubChatName,
+  selectedIndividualChatId,
+  selectedIndividualChatName,
+  selectedIndividualChatUserId,
+}: MessagesProps) {
   const [chats, setChats] = useState<ChatRoom[]>([
     {
       id: 'chat_1',
@@ -90,8 +100,25 @@ export default function Messages({ user, selectedClubChatId, selectedClubChatNam
         setChats([...chats, newClubChat])
         setSelectedChat(newClubChat)
       }
+    } else if (selectedIndividualChatId) {
+      // Handle individual chat
+      const individualChat = chats.find(c => c.id === selectedIndividualChatId)
+      if (individualChat) {
+        setSelectedChat(individualChat)
+      } else {
+        // If individual chat doesn't exist, create it
+        const newIndividualChat: ChatRoom = {
+          id: selectedIndividualChatId,
+          type: 'individual',
+          participantId: selectedIndividualChatUserId || '',
+          participantName: selectedIndividualChatName || 'Unknown User',
+          messages: [],
+        }
+        setChats([...chats, newIndividualChat])
+        setSelectedChat(newIndividualChat)
+      }
     }
-  }, [selectedClubChatId, selectedClubChatName, chats, user])
+  }, [selectedClubChatId, selectedClubChatName, selectedIndividualChatId, selectedIndividualChatName, selectedIndividualChatUserId, chats, user])
 
   const filteredChats = chats.filter(chat => {
     if (activeTab === 'all') return true

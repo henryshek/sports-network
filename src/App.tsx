@@ -26,6 +26,9 @@ export default function App() {
   const [events, setEvents] = useState<Event[]>(mockEvents)
   const [selectedClubChatId, setSelectedClubChatId] = useState<string | null>(null)
   const [selectedClubChatName, setSelectedClubChatName] = useState<string | null>(null)
+  const [selectedIndividualChatId, setSelectedIndividualChatId] = useState<string | null>(null)
+  const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
+  const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -113,8 +116,9 @@ export default function App() {
             onBack={() => setCurrentPage('events')}
             onMessageOrganizer={(organizerId, organizerName) => {
               // Create or open chat with organizer
-              console.log('Opening chat with:', organizerId, organizerName)
-              alert(`Opening chat with ${organizerName}...`)
+              setSelectedIndividualChatId(`chat_${organizerId}`)
+              setSelectedIndividualChatName(organizerName)
+              setSelectedIndividualChatUserId(organizerId)
               setCurrentPage('messages')
             }}
           />
@@ -148,7 +152,16 @@ export default function App() {
             }}
           />
         )}
-        {currentPage === 'messages' && <Messages user={user} selectedClubChatId={selectedClubChatId} selectedClubChatName={selectedClubChatName} />}
+        {currentPage === 'messages' && (
+          <Messages
+            user={user}
+            selectedClubChatId={selectedClubChatId}
+            selectedClubChatName={selectedClubChatName}
+            selectedIndividualChatId={selectedIndividualChatId}
+            selectedIndividualChatName={selectedIndividualChatName}
+            selectedIndividualChatUserId={selectedIndividualChatUserId}
+          />
+        )}
         {currentPage === 'profile' && <Profile user={user} onLogout={handleLogout} />}
       </main>
 
