@@ -115,7 +115,7 @@ export default function App() {
           else if (page === 'nearby') setCurrentPage('nearby')
           else if (page === 'create-event') setCurrentPage('create-event')
         }} onEventDetails={navigateToEventDetail} />}
-        {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} />}
+        {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} onEventManagement={() => setCurrentPage('event-management')} />}
         {currentPage === 'event-detail' && selectedEventId && (
           <EventDetail
             eventId={selectedEventId}

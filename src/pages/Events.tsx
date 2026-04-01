@@ -7,9 +7,10 @@ import { TOP_SPORTS, isTopSport } from '@/constants/sports'
 interface EventsProps {
   onSelectEvent: (eventId: string) => void
   onCreateEvent?: () => void
+  onEventManagement?: () => void
 }
 
-export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
+export default function Events({ onSelectEvent, onCreateEvent, onEventManagement }: EventsProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSport, setSelectedSport] = useState<string>('')
   const [events] = useState<Event[]>(mockEvents)
@@ -61,9 +62,14 @@ export default function Events({ onSelectEvent, onCreateEvent }: EventsProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Events</h1>
-        <button onClick={onCreateEvent} className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
-          + Create Event
-        </button>
+        <div className="flex gap-2">
+          <button onClick={onEventManagement} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+            📋 Manage Events
+          </button>
+          <button onClick={onCreateEvent} className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition">
+            + Create Event
+          </button>
+        </div>
       </div>
 
 
