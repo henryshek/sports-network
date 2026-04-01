@@ -108,76 +108,80 @@ export function EventManagementPage({ onBack }: EventManagementPageProps) {
     },
   ];
 
-  const [events, setEvents] = useState(managedEvents);
+  const [events, setEvents] = useState(() => {
+    const stored = localStorage.getItem('events');
+    return stored ? JSON.parse(stored) : managedEvents;
+  });
+
+  const saveEvents = (updatedEvents: ManagedEvent[]) => {
+    setEvents(updatedEvents);
+    localStorage.setItem('events', JSON.stringify(updatedEvents));
+  };
 
   const handleApprove = (eventId: string, participantId: string) => {
-    setEvents((prev) =>
-      prev.map((event) => {
-        if (event.id === eventId) {
-          const participant = event.pendingRequests.find((p) => p.id === participantId);
-          if (participant && event.confirmedParticipants.length < event.maxParticipants) {
-            return {
-              ...event,
-              confirmedParticipants: [
-                ...event.confirmedParticipants,
-                { ...participant, status: 'confirmed' },
-              ],
-              pendingRequests: event.pendingRequests.filter((p) => p.id !== participantId),
-            };
-          }
+    const updatedEvents = events.map((event: ManagedEvent) => {
+      if (event.id === eventId) {
+        const participant = event.pendingRequests.find((p: EventParticipant) => p.id === participantId);
+        if (participant && event.confirmedParticipants.length < event.maxParticipants) {
+          return {
+            ...event,
+            confirmedParticipants: [
+              ...event.confirmedParticipants,
+              { ...participant, status: 'confirmed' },
+            ],
+            pendingRequests: event.pendingRequests.filter((p: EventParticipant) => p.id !== participantId),
+          };
         }
-        return event;
-      })
-    );
+      }
+      return event;
+    });
+    saveEvents(updatedEvents);
   };
 
   const handleReject = (eventId: string, participantId: string) => {
-    setEvents((prev) =>
-      prev.map((event) => {
-        if (event.id === eventId) {
-          return {
-            ...event,
-            pendingRequests: event.pendingRequests.filter((p) => p.id !== participantId),
-          };
-        }
-        return event;
-      })
-    );
+    const updatedEvents = events.map((event: ManagedEvent) => {
+      if (event.id === eventId) {
+        return {
+          ...event,
+          pendingRequests: event.pendingRequests.filter((p: EventParticipant) => p.id !== participantId),
+        };
+      }
+      return event;
+    });
+    saveEvents(updatedEvents);
   };
 
   const handleMoveFromWaitlist = (eventId: string, participantId: string) => {
-    setEvents((prev) =>
-      prev.map((event) => {
-        if (event.id === eventId) {
-          const participant = event.waitlistParticipants.find((p) => p.id === participantId);
-          if (participant && event.confirmedParticipants.length < event.maxParticipants) {
-            return {
-              ...event,
-              confirmedParticipants: [
-                ...event.confirmedParticipants,
-                { ...participant, status: 'confirmed' },
-              ],
-              waitlistParticipants: event.waitlistParticipants.filter((p) => p.id !== participantId),
-            };
-          }
+    const updatedEvents = events.map((event: ManagedEvent) => {
+      if (event.id === eventId) {
+        const participant = event.waitlistParticipants.find((p: EventParticipant) => p.id === participantId);
+        if (participant && event.confirmedParticipants.length < event.maxParticipants) {
+          return {
+            ...event,
+            confirmedParticipants: [
+              ...event.confirmedParticipants,
+              { ...participant, status: 'confirmed' },
+            ],
+            waitlistParticipants: event.waitlistParticipants.filter((p: EventParticipant) => p.id !== participantId),
+          };
         }
-        return event;
-      })
-    );
+      }
+      return event;
+    });
+    saveEvents(updatedEvents);
   };
 
   const handleRemoveParticipant = (eventId: string, participantId: string) => {
-    setEvents((prev) =>
-      prev.map((event) => {
-        if (event.id === eventId) {
-          return {
-            ...event,
-            confirmedParticipants: event.confirmedParticipants.filter((p) => p.id !== participantId),
-          };
-        }
-        return event;
-      })
-    );
+    const updatedEvents = events.map((event: ManagedEvent) => {
+      if (event.id === eventId) {
+        return {
+          ...event,
+          confirmedParticipants: event.confirmedParticipants.filter((p: EventParticipant) => p.id !== participantId),
+        };
+      }
+      return event;
+    });
+    saveEvents(updatedEvents);
   };
 
   return (
@@ -203,7 +207,7 @@ export function EventManagementPage({ onBack }: EventManagementPageProps) {
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="space-y-6">
-          {events.map((event) => (
+          {events.map((event: ManagedEvent) => (
             <div key={event.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               {/* Event Header */}
               <div className="bg-blue-50 border-b border-gray-200 p-4">
@@ -269,7 +273,7 @@ export function EventManagementPage({ onBack }: EventManagementPageProps) {
                     {event.pendingRequests.length === 0 ? (
                       <p className="text-center text-gray-500 py-4">No pending requests</p>
                     ) : (
-                      event.pendingRequests.map((participant) => (
+                      event.pendingRequests.map((participant: EventParticipant) => (
                         <div
                           key={participant.id}
                           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
@@ -308,7 +312,7 @@ export function EventManagementPage({ onBack }: EventManagementPageProps) {
                     {event.confirmedParticipants.length === 0 ? (
                       <p className="text-center text-gray-500 py-4">No confirmed participants</p>
                     ) : (
-                      event.confirmedParticipants.map((participant) => (
+                      event.confirmedParticipants.map((participant: EventParticipant) => (
                         <div
                           key={participant.id}
                           className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200"
@@ -338,7 +342,7 @@ export function EventManagementPage({ onBack }: EventManagementPageProps) {
                     {event.waitlistParticipants.length === 0 ? (
                       <p className="text-center text-gray-500 py-4">No waitlist participants</p>
                     ) : (
-                      event.waitlistParticipants.map((participant) => (
+                      event.waitlistParticipants.map((participant: EventParticipant) => (
                         <div
                           key={participant.id}
                           className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200"

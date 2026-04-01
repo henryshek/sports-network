@@ -17,8 +17,7 @@ interface ClubAdminRequestsProps {
 }
 
 export function ClubAdminRequestsPage({ onBack }: ClubAdminRequestsProps) {
-  // Mock data for join requests
-  const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([
+  const mockRequests: JoinRequest[] = [
     {
       id: 'req1',
       userId: 'user5',
@@ -49,22 +48,30 @@ export function ClubAdminRequestsPage({ onBack }: ClubAdminRequestsProps) {
       requestDate: '2026-04-03',
       status: 'pending',
     },
-  ]);
+  ];
+
+  const [joinRequests, setJoinRequests] = useState<JoinRequest[]>(() => {
+    const stored = localStorage.getItem('clubJoinRequests');
+    return stored ? JSON.parse(stored) : mockRequests;
+  });
+
+  const saveRequests = (updatedRequests: JoinRequest[]) => {
+    setJoinRequests(updatedRequests);
+    localStorage.setItem('clubJoinRequests', JSON.stringify(updatedRequests));
+  };
 
   const handleApprove = (requestId: string) => {
-    setJoinRequests((prev) =>
-      prev.map((req) =>
-        req.id === requestId ? { ...req, status: 'approved' } : req
-      )
+    const updatedRequests = joinRequests.map((req) =>
+      req.id === requestId ? { ...req, status: 'approved' as const } : req
     );
+    saveRequests(updatedRequests);
   };
 
   const handleReject = (requestId: string) => {
-    setJoinRequests((prev) =>
-      prev.map((req) =>
-        req.id === requestId ? { ...req, status: 'rejected' } : req
-      )
+    const updatedRequests = joinRequests.map((req) =>
+      req.id === requestId ? { ...req, status: 'rejected' as const } : req
     );
+    saveRequests(updatedRequests);
   };
 
   const pendingRequests = joinRequests.filter((r) => r.status === 'pending');
