@@ -346,7 +346,7 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
                 >
                   View Club
                 </button>
-                {userClubs.includes(club.id) ? (
+                {club.members.includes('user1') ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
