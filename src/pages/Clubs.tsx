@@ -41,7 +41,7 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       club.description.toLowerCase().includes(searchQuery.toLowerCase())
     
     let matchesSport = true
-    if (selectedSport) {
+    if (selectedSport && selectedSport !== '') {
       if (selectedSport === 'others') {
         matchesSport = !isTopSport(club.sport)
       } else {
@@ -75,11 +75,85 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
   }
 
   const handleJoinClub = (clubId: string, clubName: string) => {
-    // Add club to user's clubs
-    const updatedUserClubs = [...userClubs, clubId]
-    setUserClubs(updatedUserClubs)
-    localStorage.setItem('userClubs', JSON.stringify(updatedUserClubs))
-    alert(`You have successfully joined ${clubName}!`)
+    // Add join request instead of immediately joining
+    const updatedClubs = clubs.map(club => {
+      if (club.id === clubId) {
+        const membershipRequests = club.membershipRequests || []
+        // Check if user already has a pending request
+        const existingRequest = membershipRequests.find(req => req.userId === 'user1')
+        if (existingRequest) {
+          alert('You already have a pending join request for this club')
+          return club
+        }
+        // Add new join request
+        return {
+          ...club,
+          membershipRequests: [
+            ...membershipRequests,
+            {
+              id: `req_${Date.now()}`,
+              clubId: clubId,
+              userId: 'user1',
+              userName: 'You',
+              status: 'pending' as const,
+              requestedAt: new Date().toISOString(),
+            }
+          ]
+        }
+      }
+      return club
+    })
+    setClubs(updatedClubs)
+    localStorage.setItem('clubs', JSON.stringify(updatedClubs))
+    alert(`Join request sent to ${clubName}! Waiting for admin approval.`)
+  }
+
+  const handleApproveJoinRequest = (clubId: string, userId: string, userName: string) => {
+    const updatedClubs = clubs.map(club => {
+      if (club.id === clubId) {
+        // Remove from membership requests
+        const updatedRequests = (club.membershipRequests || []).filter(
+          req => !(req.userId === userId && req.status === 'pending')
+        )
+        // Add to members
+        const updatedMembers = [...(club.members || []), userId]
+        return {
+          ...club,
+          membershipRequests: updatedRequests,
+          members: updatedMembers,
+        }
+      }
+      return club
+    })
+    setClubs(updatedClubs)
+    localStorage.setItem('clubs', JSON.stringify(updatedClubs))
+    alert(`${userName} has been approved to join the club!`)
+  }
+
+  const handleRejectJoinRequest = (clubId: string, userId: string) => {
+    const updatedClubs = clubs.map(club => {
+      if (club.id === clubId) {
+        const updatedRequests = (club.membershipRequests || []).map(req => {
+          if (req.userId === userId && req.status === 'pending') {
+            return {
+              ...req,
+              status: 'rejected' as const,
+              respondedAt: new Date().toISOString(),
+              respondedBy: 'user1',
+            }
+          }
+          return req
+        })
+        return {
+          ...club,
+          membershipRequests: updatedRequests,
+        }
+      }
+      return club
+    })
+    setClubs(updatedClubs)
+    localStorage.setItem('clubs', JSON.stringify(updatedClubs))
+    alert('Join request rejected')
   }
 
 
@@ -285,17 +359,27 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
                   >
                     💬 Chat
                   </button>
-                ) : (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleJoinClub(club.id, club.name)
-                    }}
-                    className="flex-1 bg-surface text-primary py-2 rounded-lg hover:bg-border transition font-semibold text-sm border border-primary"
-                  >
-                    Join
-                  </button>
-                )}
+                ) : (() => {
+                  const hasPendingRequest = (club.membershipRequests || []).some(
+                    req => req.userId === 'user1' && req.status === 'pending'
+                  )
+                  return (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleJoinClub(club.id, club.name)
+                      }}
+                      disabled={hasPendingRequest}
+                      className={`flex-1 py-2 rounded-lg transition font-semibold text-sm border ${
+                        hasPendingRequest
+                          ? 'bg-warning/10 text-warning border-warning cursor-not-allowed'
+                          : 'bg-surface text-primary border-primary hover:bg-border'
+                      }`}
+                    >
+                      {hasPendingRequest ? '⏳ Pending' : 'Join'}
+                    </button>
+                  )
+                })()}
               </div>
             </div>
           ))

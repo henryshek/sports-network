@@ -46,6 +46,7 @@ export default function ClubDetail({ clubId, user, onBack, onClubChat, onOpenSet
   const isAdmin = club.admins.includes(user.id)
   const isOrganizer = club.organizers.includes(user.id)
   const canPostAnnouncement = isAdmin || isOrganizer
+  const pendingRequests = (club.membershipRequests || []).filter(req => req.status === 'pending')
 
   const handleJoinClub = () => {
     if (isMember) {
@@ -197,6 +198,75 @@ export default function ClubDetail({ clubId, user, onBack, onClubChat, onOpenSet
               </>
             )}
           </div>
+
+          {/* Pending Join Requests - Admin Only */}
+          {isAdmin && pendingRequests.length > 0 && (
+            <div className="mt-8 pt-8 border-t border-border">
+              <h3 className="text-xl font-semibold text-foreground mb-4">📋 Pending Join Requests ({pendingRequests.length})</h3>
+              <div className="space-y-3">
+                {pendingRequests.map(request => (
+                  <div key={request.id} className="flex items-center justify-between bg-surface p-4 rounded-lg border border-border">
+                    <div>
+                      <p className="font-semibold text-foreground">{request.userName}</p>
+                      <p className="text-sm text-muted">Requested {new Date(request.requestedAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          const updatedClub = {
+                            ...club,
+                            membershipRequests: (club.membershipRequests || []).map(req => 
+                              req.id === request.id 
+                                ? { ...req, status: 'approved' as const, respondedAt: new Date().toISOString(), respondedBy: user.id }
+                                : req
+                            ),
+                            members: [...club.members, request.userId]
+                          }
+                          setClub(updatedClub)
+                          
+                          // Auto-add to club chat
+                          const chatRoomId = club.groupChatId || `chat_${club.id}`
+                          const existingChat = JSON.parse(localStorage.getItem('groupChats') || '[]')
+                          const updatedChats = existingChat.map((chat: any) => {
+                            if (chat.id === chatRoomId) {
+                              return {
+                                ...chat,
+                                groupMembers: [...(chat.groupMembers || []), request.userId]
+                              }
+                            }
+                            return chat
+                          })
+                          localStorage.setItem('groupChats', JSON.stringify(updatedChats))
+                          
+                          alert(`${request.userName} has been approved and added to the club chat!`)
+                        }}
+                        className="px-4 py-2 bg-success text-white rounded-lg hover:opacity-90 transition font-semibold text-sm"
+                      >
+                        ✓ Approve
+                      </button>
+                      <button
+                        onClick={() => {
+                          const updatedClub = {
+                            ...club,
+                            membershipRequests: (club.membershipRequests || []).map(req => 
+                              req.id === request.id 
+                                ? { ...req, status: 'rejected' as const, respondedAt: new Date().toISOString(), respondedBy: user.id }
+                                : req
+                            )
+                          }
+                          setClub(updatedClub)
+                          alert(`${request.userName}'s request has been rejected`)
+                        }}
+                        className="px-4 py-2 bg-error text-white rounded-lg hover:opacity-90 transition font-semibold text-sm"
+                      >
+                        ✕ Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
