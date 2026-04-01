@@ -83,42 +83,57 @@ export default function Messages({
   const [activeTab, setActiveTab] = useState<MessageTab>('all')
 
   useEffect(() => {
-    if (selectedClubChatId) {
+    console.log('Chat effect triggered:', { selectedClubChatId, selectedIndividualChatId })
+    if (selectedClubChatId && selectedClubChatName) {
+      console.log('Creating/finding club chat:', selectedClubChatId)
       const clubChat = chats.find(c => c.id === selectedClubChatId)
       if (clubChat) {
+        console.log('Found existing club chat')
         setSelectedChat(clubChat)
       } else {
         // If club chat doesn't exist, create it
+        console.log('Creating new club chat')
         const newClubChat: ChatRoom = {
           id: selectedClubChatId,
           type: 'group',
-          participantName: selectedClubChatName || `Club Chat ${selectedClubChatId}`,
+          participantName: selectedClubChatName,
           groupMembers: user ? [user.id] : [],
           messages: [],
           isGroup: true,
         }
-        setChats(prev => [...prev, newClubChat])
+        setChats(prev => {
+          const updated = [...prev, newClubChat]
+          console.log('Updated chats:', updated)
+          return updated
+        })
         setSelectedChat(newClubChat)
       }
-    } else if (selectedIndividualChatId) {
+    } else if (selectedIndividualChatId && selectedIndividualChatName) {
       // Handle individual chat
+      console.log('Creating/finding individual chat:', selectedIndividualChatId)
       const individualChat = chats.find(c => c.id === selectedIndividualChatId)
       if (individualChat) {
+        console.log('Found existing individual chat')
         setSelectedChat(individualChat)
       } else {
         // If individual chat doesn't exist, create it
+        console.log('Creating new individual chat')
         const newIndividualChat: ChatRoom = {
           id: selectedIndividualChatId,
           type: 'individual',
           participantId: selectedIndividualChatUserId || '',
-          participantName: selectedIndividualChatName || 'Unknown User',
+          participantName: selectedIndividualChatName,
           messages: [],
         }
-        setChats(prev => [...prev, newIndividualChat])
+        setChats(prev => {
+          const updated = [...prev, newIndividualChat]
+          console.log('Updated chats:', updated)
+          return updated
+        })
         setSelectedChat(newIndividualChat)
       }
     }
-  }, [selectedClubChatId, selectedClubChatName, selectedIndividualChatId, selectedIndividualChatName, selectedIndividualChatUserId])
+  }, [selectedClubChatId, selectedClubChatName, selectedIndividualChatId, selectedIndividualChatName, selectedIndividualChatUserId, chats])
 
   const filteredChats = chats.filter(chat => {
     if (activeTab === 'all') return true
