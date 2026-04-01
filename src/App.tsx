@@ -135,7 +135,7 @@ export default function App() {
           <CreateEvent onBack={() => setCurrentPage('events')} user={user} onEventCreated={handleEventCreated} />
         )}
         {currentPage === 'map' && <MapView onSelectEvent={navigateToEventDetail} />}
-        {currentPage === 'clubs' && <Clubs onSelectClub={navigateToClubDetail} />}
+        {currentPage === 'clubs' && <Clubs onSelectClub={navigateToClubDetail} onClubAdmin={() => setCurrentPage('club-admin-requests')} />}
         {currentPage === 'club-detail' && selectedClubId && (
           <ClubDetail
             clubId={selectedClubId}

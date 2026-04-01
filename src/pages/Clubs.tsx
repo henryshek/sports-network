@@ -7,10 +7,11 @@ import WeeklyEventsTimeline from '@/components/WeeklyEventsTimeline'
 interface ClubsProps {
   onSelectClub: (clubId: string) => void
   onCreateGroupChat?: (groupName: string) => void
+  onClubAdmin?: () => void
   user?: any
 }
 
-export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
+export default function Clubs({ onSelectClub, onCreateGroupChat, onClubAdmin }: ClubsProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSport, setSelectedSport] = useState<string>('')
   const [clubs, setClubs] = useState<Club[]>(() => {
@@ -190,12 +191,20 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Clubs</h1>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
-        >
-          + Create Club
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onClubAdmin}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          >
+            👑 Club Admin
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+          >
+            + Create Club
+          </button>
+        </div>
       </div>
 
       {/* Search and Filters */}
