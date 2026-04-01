@@ -356,25 +356,42 @@ export default function Messages({
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {selectedChat.messages.map(msg => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.senderId === 'user1' ? 'justify-end' : 'justify-start'}`}
-                  >
+                {selectedChat.messages.map(msg => {
+                  const sender = mockUsers[msg.senderId as keyof typeof mockUsers]
+                  const senderName = msg.senderId === 'user1' ? 'You' : (sender?.name || 'Unknown')
+                  const senderAvatar = sender?.avatar || '👤'
+                  
+                  return (
                     <div
-                      className={`max-w-xs px-4 py-2 rounded-lg ${
-                        msg.senderId === 'user1'
-                          ? 'bg-primary text-white'
-                          : 'bg-surface text-foreground border border-border'
-                      }`}
+                      key={msg.id}
+                      className={`flex gap-3 ${msg.senderId === 'user1' ? 'flex-row-reverse' : 'flex-row'}`}
                     >
-                      <p className="text-sm">{msg.text}</p>
-                      <p className={`text-xs mt-1 ${msg.senderId === 'user1' ? 'text-white/70' : 'text-muted'}`}>
-                        {msg.timestamp}
-                      </p>
+                      {/* Avatar */}
+                      <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-lg flex-shrink-0">
+                        {senderAvatar}
+                      </div>
+                      
+                      {/* Message Bubble */}
+                      <div className={`flex flex-col ${msg.senderId === 'user1' ? 'items-end' : 'items-start'}`}>
+                        <p className={`text-xs font-semibold mb-1 ${msg.senderId === 'user1' ? 'text-primary' : 'text-foreground'}`}>
+                          {senderName}
+                        </p>
+                        <div
+                          className={`max-w-xs px-4 py-2 rounded-lg ${
+                            msg.senderId === 'user1'
+                              ? 'bg-primary text-white'
+                              : 'bg-surface text-foreground border border-border'
+                          }`}
+                        >
+                          <p className="text-sm">{msg.text}</p>
+                          <p className={`text-xs mt-1 ${msg.senderId === 'user1' ? 'text-white/70' : 'text-muted'}`}>
+                            {msg.timestamp}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
               {/* Input */}
