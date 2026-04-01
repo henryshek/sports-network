@@ -6,9 +6,10 @@ import { mockEvents } from '@/mockData'
 interface HomeProps {
   user: User
   onNavigate?: (page: string) => void
+  onEventDetails?: (eventId: string) => void
 }
 
-export default function Home({ user, onNavigate }: HomeProps) {
+export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [twoWeekDates, setTwoWeekDates] = useState<Date[]>([])
   const [selectedDateEvents, setSelectedDateEvents] = useState<Event[]>([])
@@ -237,7 +238,10 @@ export default function Home({ user, onNavigate }: HomeProps) {
                     </div>
 
                     {/* Action Button */}
-                    <button className="mt-3 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition font-semibold">
+                    <button 
+                      onClick={() => onEventDetails?.(event.id)}
+                      className="mt-3 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition font-semibold"
+                    >
                       View Details
                     </button>
                   </div>
@@ -248,7 +252,10 @@ export default function Home({ user, onNavigate }: HomeProps) {
             <div className="text-center py-12">
               <p className="text-3xl mb-3">📭</p>
               <p className="text-muted">No events scheduled for {formatDateShort(selectedDate)}</p>
-              <button className="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition font-semibold text-sm">
+              <button 
+                onClick={() => onNavigate?.('create-event')}
+                className="mt-4 px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition font-semibold text-sm"
+              >
                 Create Event
               </button>
             </div>

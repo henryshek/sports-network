@@ -11,11 +11,14 @@ import ClubSettings from './pages/ClubSettings'
 import Messages from './pages/Messages'
 import Profile from './pages/Profile'
 import MapView from './pages/MapView'
+import Trending from './pages/Trending'
+import Saved from './pages/Saved'
+import Nearby from './pages/Nearby'
 import { LogOut, Home as HomeIcon, Calendar, Users, MessageSquare, User as UserIcon, Map } from 'lucide-react'
 import { mockEvents } from './mockData'
 import { Event } from './types'
 
-type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'club-detail' | 'club-settings' | 'messages' | 'profile' | 'map'
+type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'club-detail' | 'club-settings' | 'messages' | 'profile' | 'map' | 'trending' | 'saved' | 'nearby' | 'create-event'
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
@@ -104,10 +107,11 @@ export default function App() {
           else if (page === 'map') setCurrentPage('map')
           else if (page === 'messages') setCurrentPage('messages')
           else if (page === 'profile') setCurrentPage('profile')
-          else if (page === 'trending') alert('Trending page coming soon')
-          else if (page === 'saved') alert('Saved page coming soon')
-          else if (page === 'nearby') alert('Nearby page coming soon')
-        }} />}
+          else if (page === 'trending') setCurrentPage('trending')
+          else if (page === 'saved') setCurrentPage('saved')
+          else if (page === 'nearby') setCurrentPage('nearby')
+          else if (page === 'create-event') setCurrentPage('create-event')
+        }} onEventDetails={navigateToEventDetail} />}
         {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} />}
         {currentPage === 'event-detail' && selectedEventId && (
           <EventDetail
@@ -165,6 +169,9 @@ export default function App() {
           />
         )}
         {currentPage === 'profile' && <Profile user={user} onLogout={handleLogout} />}
+        {currentPage === 'trending' && <Trending onEventDetails={navigateToEventDetail} onClubDetails={navigateToClubDetail} />}
+        {currentPage === 'saved' && <Saved onEventDetails={navigateToEventDetail} onClubDetails={navigateToClubDetail} />}
+        {currentPage === 'nearby' && <Nearby onEventDetails={navigateToEventDetail} onClubDetails={navigateToClubDetail} />}
       </main>
 
       {/* Bottom Navigation */}
