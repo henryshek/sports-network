@@ -298,20 +298,7 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
                 >
                   View Club
                 </button>
-                {club.members.includes('user1') ? (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (onCreateGroupChat) {
-                        onCreateGroupChat(club.name)
-                      }
-                      alert(`Opening chat for ${club.name}...`)
-                    }}
-                    className="flex-1 bg-success text-white py-2 rounded-lg hover:bg-success/90 transition font-semibold text-sm"
-                  >
-                    💬 Chat
-                  </button>
-                ) : (() => {
+                {!club.members.includes('user1') && (() => {
                   const hasPendingRequest = (club.membershipRequests || []).some(
                     req => req.userId === 'user1' && req.status === 'pending'
                   )
