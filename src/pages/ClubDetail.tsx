@@ -22,8 +22,10 @@ export default function ClubDetail({ clubId, user, onBack, onClubChat, onOpenSet
   const [showAnnouncementForm, setShowAnnouncementForm] = useState(false)
 
   useEffect(() => {
-    // Find club from mock data
-    const foundClub = mockClubs.find(c => c.id === clubId)
+    // Find club from localStorage first, then fallback to mock data
+    const savedClubs = localStorage.getItem('clubs')
+    const clubsToSearch = savedClubs ? JSON.parse(savedClubs) : mockClubs
+    const foundClub = clubsToSearch.find((c: Club) => c.id === clubId)
     if (foundClub) {
       setClub(foundClub)
       setIsMember(foundClub.members.includes(user.id))
