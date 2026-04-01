@@ -65,6 +65,7 @@ export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
     { id: 'trending', label: 'Trending', icon: '🔥', color: 'bg-red-100 text-red-600', description: 'Popular now' },
     { id: 'saved', label: 'Saved', icon: '⭐', color: 'bg-yellow-100 text-yellow-600', description: 'Bookmarks' },
     { id: 'nearby', label: 'Nearby', icon: '📍', color: 'bg-indigo-100 text-indigo-600', description: 'Around you' },
+    { id: 'my-events', label: 'My Events', icon: '✓', color: 'bg-teal-100 text-teal-600', description: 'Your joined events' },
   ]
 
   const getSportEmoji = (sport: string) => {

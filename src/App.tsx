@@ -14,11 +14,14 @@ import MapView from './pages/MapView'
 import Trending from './pages/Trending'
 import Saved from './pages/Saved'
 import Nearby from './pages/Nearby'
+import { MyEventsPage } from './pages/MyEvents'
+import { ClubAdminRequestsPage } from './pages/ClubAdminRequests'
+import { EventManagementPage } from './pages/EventManagement'
 import { LogOut, Home as HomeIcon, Calendar, Users, MessageSquare, User as UserIcon, Map } from 'lucide-react'
 import { mockEvents } from './mockData'
 import { Event } from './types'
 
-type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'club-detail' | 'club-settings' | 'messages' | 'profile' | 'map' | 'trending' | 'saved' | 'nearby' | 'create-event'
+type Page = 'home' | 'events' | 'event-detail' | 'create-event' | 'clubs' | 'club-detail' | 'club-settings' | 'messages' | 'profile' | 'map' | 'trending' | 'saved' | 'nearby' | 'my-events' | 'club-admin-requests' | 'event-management'
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null)
@@ -172,6 +175,9 @@ export default function App() {
         {currentPage === 'trending' && <Trending onEventDetails={navigateToEventDetail} onClubDetails={navigateToClubDetail} />}
         {currentPage === 'saved' && <Saved onEventDetails={navigateToEventDetail} onClubDetails={navigateToClubDetail} />}
         {currentPage === 'nearby' && <Nearby onEventDetails={navigateToEventDetail} onClubDetails={navigateToClubDetail} />}
+        {currentPage === 'my-events' && <MyEventsPage onBack={() => setCurrentPage('home')} />}
+        {currentPage === 'club-admin-requests' && <ClubAdminRequestsPage onBack={() => setCurrentPage('clubs')} />}
+        {currentPage === 'event-management' && <EventManagementPage onBack={() => setCurrentPage('events')} />}
       </main>
 
       {/* Bottom Navigation */}
