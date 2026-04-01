@@ -413,7 +413,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-03-01',
     updatedAt: '2024-03-01',
-    events: [mockEvents[0]],
+    events: [mockEvents[0], mockEvents[10]],
     membershipRequests: [],
   },
   {
@@ -430,7 +430,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-03-05',
     updatedAt: '2024-03-05',
-    events: [mockEvents[1]],
+    events: [mockEvents[1]],  // Tennis Match
     membershipRequests: [],
   },
   {
@@ -447,7 +447,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-03-10',
     updatedAt: '2024-03-10',
-    events: [mockEvents[2]],
+    events: [mockEvents[2]],  // Volleyball Tournament
     membershipRequests: [],
   },
   {
@@ -464,7 +464,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-03-15',
     updatedAt: '2024-03-15',
-    events: [mockEvents[3]],
+    events: [mockEvents[3]],  // Soccer Practice
     membershipRequests: [],
   },
   {
@@ -481,7 +481,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-03-20',
     updatedAt: '2024-03-20',
-    events: [mockEvents[4]],
+    events: [mockEvents[4]],  // Badminton Doubles
     membershipRequests: [],
   },
   {
@@ -498,7 +498,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-03-22',
     updatedAt: '2024-03-22',
-    events: [mockEvents[5]],
+    events: [mockEvents[5]],  // Morning Running
     membershipRequests: [],
   },
   {
@@ -515,7 +515,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-03-25',
     updatedAt: '2024-03-25',
-    events: [mockEvents[6]],
+    events: [mockEvents[6]],  // Cricket Practice
     membershipRequests: [],
   },
   {
@@ -532,7 +532,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-03-28',
     updatedAt: '2024-03-28',
-    events: [mockEvents[7]],
+    events: [mockEvents[7]],  // Yoga Session
     membershipRequests: [],
   },
   {
@@ -549,7 +549,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-03-30',
     updatedAt: '2024-03-30',
-    events: [mockEvents[8]],
+    events: [mockEvents[8]],  // Cycling Tour
     membershipRequests: [],
   },
   {
@@ -566,7 +566,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-04-01',
     updatedAt: '2024-04-01',
-    events: [mockEvents[9]],
+    events: [mockEvents[9]],  // Swimming Training
     membershipRequests: [],
   },
   {
@@ -583,7 +583,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-04-02',
     updatedAt: '2024-04-02',
-    events: [],
+    events: [mockEvents[10]],
     membershipRequests: [],
   },
   {
@@ -600,7 +600,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-04-03',
     updatedAt: '2024-04-03',
-    events: [],
+    events: [mockEvents[11]],
     membershipRequests: [],
   },
   {
@@ -617,7 +617,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-04-04',
     updatedAt: '2024-04-04',
-    events: [],
+    events: [mockEvents[12]],
     membershipRequests: [],
   },
   {
@@ -634,7 +634,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-04-05',
     updatedAt: '2024-04-05',
-    events: [],
+    events: [mockEvents[13]],
     membershipRequests: [],
   },
   {
@@ -651,7 +651,7 @@ export const mockClubs: Club[] = [
     isPrivate: false,
     createdAt: '2024-04-06',
     updatedAt: '2024-04-06',
-    events: [],
+    events: [mockEvents[14]],
     membershipRequests: [],
   },
 ]
