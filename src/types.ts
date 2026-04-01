@@ -1,4 +1,4 @@
-export type SportType = 'basketball' | 'soccer' | 'tennis' | 'volleyball' | 'badminton' | 'cricket' | 'baseball' | 'american-football' | 'hockey' | 'golf' | 'swimming' | 'cycling' | 'running' | 'yoga' | 'other'
+export type SportType = 'basketball' | 'soccer' | 'tennis' | 'volleyball' | 'badminton' | 'cricket' | 'baseball' | 'american-football' | 'hockey' | 'golf' | 'swimming' | 'cycling' | 'running' | 'yoga' | 'pickleball' | 'other'
 
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'professional'
 

@@ -28,10 +28,7 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
   const [customSportName, setCustomSportName] = useState('')
   const [clubPhoto, setClubPhoto] = useState<string>('')
   const [backgroundPhoto, setBackgroundPhoto] = useState<string>('')
-  const [userClubs, setUserClubs] = useState<string[]>(() => {
-    const savedUserClubs = localStorage.getItem('userClubs')
-    return savedUserClubs ? JSON.parse(savedUserClubs) : ['club1']
-  })
+  // Removed: userClubs state - now using club.members directly
 
   const topSports = TOP_SPORTS.map(s => s.toLowerCase())
 
@@ -108,53 +105,8 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
     alert(`Join request sent to ${clubName}! Waiting for admin approval.`)
   }
 
-  const handleApproveJoinRequest = (clubId: string, userId: string, userName: string) => {
-    const updatedClubs = clubs.map(club => {
-      if (club.id === clubId) {
-        // Remove from membership requests
-        const updatedRequests = (club.membershipRequests || []).filter(
-          req => !(req.userId === userId && req.status === 'pending')
-        )
-        // Add to members
-        const updatedMembers = [...(club.members || []), userId]
-        return {
-          ...club,
-          membershipRequests: updatedRequests,
-          members: updatedMembers,
-        }
-      }
-      return club
-    })
-    setClubs(updatedClubs)
-    localStorage.setItem('clubs', JSON.stringify(updatedClubs))
-    alert(`${userName} has been approved to join the club!`)
-  }
-
-  const handleRejectJoinRequest = (clubId: string, userId: string) => {
-    const updatedClubs = clubs.map(club => {
-      if (club.id === clubId) {
-        const updatedRequests = (club.membershipRequests || []).map(req => {
-          if (req.userId === userId && req.status === 'pending') {
-            return {
-              ...req,
-              status: 'rejected' as const,
-              respondedAt: new Date().toISOString(),
-              respondedBy: 'user1',
-            }
-          }
-          return req
-        })
-        return {
-          ...club,
-          membershipRequests: updatedRequests,
-        }
-      }
-      return club
-    })
-    setClubs(updatedClubs)
-    localStorage.setItem('clubs', JSON.stringify(updatedClubs))
-    alert('Join request rejected')
-  }
+  // Removed: handleApproveJoinRequest - now handled in ClubDetail
+  // Removed: handleRejectJoinRequest - now handled in ClubDetail
 
 
 
@@ -171,7 +123,7 @@ export default function Clubs({ onSelectClub, onCreateGroupChat }: ClubsProps) {
       swimming: '🏊',
       yoga: '🧘',
       pickleball: '🏓',
-      others: '🏅',
+      other: '🏅',
     }
     return emojis[sport.toLowerCase()] || '⚽'
   }
