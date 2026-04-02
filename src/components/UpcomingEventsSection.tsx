@@ -4,27 +4,20 @@ import { useMemo } from 'react'
 interface UpcomingEventsSectionProps {
   user: User
   events: Event[]
+  joinedEventIds?: string[]
   onEventDetails?: (eventId: string) => void
 }
 
-export function UpcomingEventsSection({ user, events, onEventDetails }: UpcomingEventsSectionProps) {
-  // Filter events that the user is involved with
+export function UpcomingEventsSection({ user, events, joinedEventIds = [], onEventDetails }: UpcomingEventsSectionProps) {
+  // Filter events that the user has joined
   const userInvolvedEvents = useMemo(() => {
-    return events.filter(event => {
-      // Check if user is a participant (participants are strings: user IDs)
-      const isParticipant = event.participants?.includes(user.id)
-      // Check if user is waitlisted
-      const isWaitlisted = event.waitlist?.includes(user.id)
-      // Check if user has reserved spots for others
-      const hasReservedSpots = event.reservedGuests?.some(guest => guest.reservedBy === user.id)
-      
-      return isParticipant || isWaitlisted || hasReservedSpots
-    }).sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.time}`)
-      const dateB = new Date(`${b.date}T${b.time}`)
-      return dateA.getTime() - dateB.getTime()
-    })
-  }, [user, events])
+    return events.filter(event => joinedEventIds.includes(event.id))
+      .sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time}`)
+        const dateB = new Date(`${b.date}T${b.time}`)
+        return dateA.getTime() - dateB.getTime()
+      })
+  }, [events, joinedEventIds])
 
   const getSportEmoji = (sport: string) => {
     const emojis: Record<string, string> = {

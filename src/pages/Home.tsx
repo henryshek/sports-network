@@ -14,6 +14,7 @@ export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [twoWeekDates, setTwoWeekDates] = useState<Date[]>([])
   const [selectedDateEvents, setSelectedDateEvents] = useState<Event[]>([])
+  const [joinedEventIds, setJoinedEventIds] = useState<string[]>([])
   const calendarRef = useRef<HTMLDivElement>(null)
 
   // Initialize 2-week dates
@@ -123,7 +124,7 @@ export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
         <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
           📅 Your Upcoming Events
         </h2>
-        <UpcomingEventsSection user={user} events={mockEvents} onEventDetails={onEventDetails} />
+        <UpcomingEventsSection user={user} events={mockEvents} joinedEventIds={joinedEventIds} onEventDetails={onEventDetails} />
       </div>
 
       {/* Quick Access Dashboard */}
@@ -239,13 +240,31 @@ export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
                       )}
                     </div>
 
-                    {/* Action Button */}
-                    <button 
-                      onClick={() => onEventDetails?.(event.id)}
-                      className="mt-3 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition font-semibold"
-                    >
-                      View Details
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 mt-3">
+                      <button 
+                        onClick={() => onEventDetails?.(event.id)}
+                        className="flex-1 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition font-semibold"
+                      >
+                        View Details
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (joinedEventIds.includes(event.id)) {
+                            setJoinedEventIds(joinedEventIds.filter(id => id !== event.id))
+                          } else {
+                            setJoinedEventIds([...joinedEventIds, event.id])
+                          }
+                        }}
+                        className={`px-4 py-2 text-sm rounded-lg transition font-semibold ${
+                          joinedEventIds.includes(event.id)
+                            ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                            : 'bg-green-100 text-green-600 hover:bg-green-200'
+                        }`}
+                      >
+                        {joinedEventIds.includes(event.id) ? 'Cancel' : 'Join'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
