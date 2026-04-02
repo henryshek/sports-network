@@ -121,6 +121,9 @@ export default function App() {
             eventId={selectedEventId}
             user={user}
             onBack={() => setCurrentPage('events')}
+            onEventUpdate={(updatedEvent) => {
+              setEvents(events.map(e => e.id === updatedEvent.id ? updatedEvent : e))
+            }}
             onMessageOrganizer={(organizerId, organizerName) => {
               // Create or open chat with organizer
               console.log('onMessageOrganizer called:', organizerId, organizerName)

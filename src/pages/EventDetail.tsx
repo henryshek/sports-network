@@ -6,6 +6,7 @@ interface EventDetailProps {
   eventId: string
   onBack: () => void
   user?: { id: string; name: string }
+  onEventUpdate?: (event: Event) => void
   onMessageOrganizer?: (organizerId: string, organizerName: string) => void
 }
 
@@ -20,13 +21,13 @@ interface UserProfile {
   joinedDate: string
 }
 
-export default function EventDetail({ eventId, onBack, onMessageOrganizer }: EventDetailProps) {
+export default function EventDetail({ eventId, onBack, user, onEventUpdate, onMessageOrganizer }: EventDetailProps) {
   const [event, setEvent] = useState<Event | null>(null)
   const [isJoined, setIsJoined] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
   const [showReserveModal, setShowReserveModal] = useState(false)
   const [reserveFor, setReserveFor] = useState('')
-  const currentUserId = 'user1'
+  const currentUserId = user?.id || 'user1'
 
   useEffect(() => {
     const foundEvent = mockEvents.find(e => e.id === eventId)
@@ -53,25 +54,31 @@ export default function EventDetail({ eventId, onBack, onMessageOrganizer }: Eve
 
   const handleJoinEvent = () => {
     if (isJoined) {
-      setEvent({
+      const updatedEvent = {
         ...event,
         currentParticipants: event.currentParticipants - 1,
         participants: event.participants.filter(p => p !== currentUserId),
-      })
+      }
+      setEvent(updatedEvent)
       setIsJoined(false)
+      onEventUpdate?.(updatedEvent)
     } else if (isFull) {
-      setEvent({
+      const updatedEvent = {
         ...event,
         waitlist: [...(event.waitlist || []), currentUserId],
-      })
+      }
+      setEvent(updatedEvent)
+      onEventUpdate?.(updatedEvent)
       alert('Added to waitlist!')
     } else {
-      setEvent({
+      const updatedEvent = {
         ...event,
         currentParticipants: event.currentParticipants + 1,
         participants: [...event.participants, currentUserId],
-      })
+      }
+      setEvent(updatedEvent)
       setIsJoined(true)
+      onEventUpdate?.(updatedEvent)
     }
   }
 
