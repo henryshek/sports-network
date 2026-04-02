@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { User, Event } from '@/types'
 import { Zap } from 'lucide-react'
 import { mockEvents } from '@/mockData'
+import { UpcomingEventsSection } from '@/components/UpcomingEventsSection'
 
 interface HomeProps {
   user: User
@@ -54,18 +55,12 @@ export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
     setSelectedDateEvents(eventsForDate)
   }, [selectedDate])
 
-
-
   const quickAccessItems = [
     { id: 'events', label: 'Events', icon: '📅', color: 'bg-blue-100 text-blue-600', description: 'Find & join events' },
     { id: 'clubs', label: 'Clubs', icon: '👥', color: 'bg-purple-100 text-purple-600', description: 'Browse clubs' },
-    { id: 'map', label: 'Map', icon: '🗺️', color: 'bg-green-100 text-green-600', description: 'View nearby' },
     { id: 'messages', label: 'Messages', icon: '💬', color: 'bg-pink-100 text-pink-600', description: 'Chat' },
+    { id: 'map', label: 'Map', icon: '🗺️', color: 'bg-green-100 text-green-600', description: 'View nearby' },
     { id: 'profile', label: 'Profile', icon: '👤', color: 'bg-orange-100 text-orange-600', description: 'Your profile' },
-    { id: 'trending', label: 'Trending', icon: '🔥', color: 'bg-red-100 text-red-600', description: 'Popular now' },
-    { id: 'saved', label: 'Saved', icon: '⭐', color: 'bg-yellow-100 text-yellow-600', description: 'Bookmarks' },
-    { id: 'nearby', label: 'Nearby', icon: '📍', color: 'bg-indigo-100 text-indigo-600', description: 'Around you' },
-    { id: 'my-events', label: 'My Events', icon: '✓', color: 'bg-teal-100 text-teal-600', description: 'Your joined events' },
   ]
 
   const getSportEmoji = (sport: string) => {
@@ -123,6 +118,14 @@ export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
         <p className="text-lg text-muted">Find sports events, join clubs, and connect with athletes in your area</p>
       </div>
 
+      {/* Your Upcoming Events Section */}
+      <div>
+        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+          📅 Your Upcoming Events
+        </h2>
+        <UpcomingEventsSection user={user} events={mockEvents} onEventDetails={onEventDetails} />
+      </div>
+
       {/* Quick Access Dashboard */}
       <div>
         <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
@@ -130,37 +133,35 @@ export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
           Quick Access
         </h2>
         
-        {/* Horizontal Scrollable Container */}
-        <div className="overflow-x-auto pb-2 -mx-8 px-8">
-          <div className="flex gap-4 min-w-min">
-            {quickAccessItems.map((item) => {
-              const handleClick = () => {
-                if (onNavigate) {
-                  onNavigate(item.id)
-                }
+        {/* Grid Layout */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {quickAccessItems.map((item) => {
+            const handleClick = () => {
+              if (onNavigate) {
+                onNavigate(item.id)
               }
-              return (
-                <button
-                  key={item.id}
-                  onClick={handleClick}
-                  className={`flex flex-col items-center justify-center w-24 h-24 rounded-xl ${item.color} hover:shadow-lg transition flex-shrink-0 font-medium`}
-                >
-                  <span className="text-4xl mb-1">{item.icon}</span>
-                  <span className="text-xs font-semibold text-center line-clamp-1">{item.label}</span>
-                </button>
-              )
-            })}
-          </div>
+            }
+            return (
+              <button
+                key={item.id}
+                onClick={handleClick}
+                className={`flex flex-col items-center justify-center p-4 rounded-xl ${item.color} hover:shadow-lg transition font-medium`}
+              >
+                <span className="text-4xl mb-2">{item.icon}</span>
+                <span className="text-sm font-semibold text-center">{item.label}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
       {/* Divider */}
       <div className="h-1 bg-surface rounded-full"></div>
 
-      {/* 2-Week Calendar and Events Timeline */}
+      {/* All Events Calendar and Timeline */}
       <div>
         <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-          📅 Upcoming Events
+          📅 All Events
         </h2>
 
         {/* 2-Week Scrollable Calendar */}
@@ -263,8 +264,6 @@ export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
           )}
         </div>
       </div>
-
-
     </div>
   )
 }
