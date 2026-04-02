@@ -1,5 +1,5 @@
 import { Event, User } from '@/types'
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 
 interface UpcomingEventsSectionProps {
   user: User
@@ -11,12 +11,12 @@ export function UpcomingEventsSection({ user, events, onEventDetails }: Upcoming
   // Filter events that the user is involved with
   const userInvolvedEvents = useMemo(() => {
     return events.filter(event => {
-      // Check if user is a participant
-      const isParticipant = event.participants?.some(p => p.id === user.id)
+      // Check if user is a participant (participants are strings: user IDs)
+      const isParticipant = event.participants?.includes(user.id)
       // Check if user is waitlisted
-      const isWaitlisted = event.waitlist?.some(p => p.id === user.id)
+      const isWaitlisted = event.waitlist?.includes(user.id)
       // Check if user has reserved spots for others
-      const hasReservedSpots = event.reservedSpots?.some(spot => spot.reservedBy === user.id)
+      const hasReservedSpots = event.reservedGuests?.some(guest => guest.reservedBy === user.id)
       
       return isParticipant || isWaitlisted || hasReservedSpots
     }).sort((a, b) => {
@@ -45,9 +45,9 @@ export function UpcomingEventsSection({ user, events, onEventDetails }: Upcoming
   }
 
   const getEventStatus = (event: Event) => {
-    const isParticipant = event.participants?.some(p => p.id === user.id)
-    const isWaitlisted = event.waitlist?.some(p => p.id === user.id)
-    const reservedSpots = event.reservedSpots?.filter(spot => spot.reservedBy === user.id) || []
+    const isParticipant = event.participants?.includes(user.id)
+    const isWaitlisted = event.waitlist?.includes(user.id)
+    const reservedSpots = event.reservedGuests?.filter(guest => guest.reservedBy === user.id) || []
 
     if (isParticipant) {
       return { status: 'joined', icon: '✅', label: 'Joined', color: 'bg-green-50 border-green-200' }
@@ -113,7 +113,7 @@ export function UpcomingEventsSection({ user, events, onEventDetails }: Upcoming
                 <div className="space-y-1">
                   {eventStatus.spots.map((spot, idx) => (
                     <p key={idx} className="text-xs text-muted ml-2">
-                      • {spot.reservedFor}
+                      • {spot.name}
                     </p>
                   ))}
                 </div>
