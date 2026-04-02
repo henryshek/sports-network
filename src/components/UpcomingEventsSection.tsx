@@ -8,9 +8,9 @@ interface UpcomingEventsSectionProps {
   onEventDetails?: (eventId: string) => void
 }
 
-export function UpcomingEventsSection({ user, events, joinedEventIds = [], onEventDetails }: UpcomingEventsSectionProps) {
-  // Filter events that the user has joined
-  const userInvolvedEvents = useMemo(() => {
+export function UpcomingEventsSection({ events, joinedEventIds = [], onEventDetails }: UpcomingEventsSectionProps) {
+  // Filter events that the user has joined via the Join button
+  const userJoinedEvents = useMemo(() => {
     return events.filter(event => joinedEventIds.includes(event.id))
       .sort((a, b) => {
         const dateA = new Date(`${a.date}T${a.time}`)
@@ -37,22 +37,7 @@ export function UpcomingEventsSection({ user, events, joinedEventIds = [], onEve
     return emojis[sport.toLowerCase()] || '⚽'
   }
 
-  const getEventStatus = (event: Event) => {
-    const isParticipant = event.participants?.includes(user.id)
-    const isWaitlisted = event.waitlist?.includes(user.id)
-    const reservedSpots = event.reservedGuests?.filter(guest => guest.reservedBy === user.id) || []
-
-    if (isParticipant) {
-      return { status: 'joined', icon: '✅', label: 'Joined', color: 'bg-green-50 border-green-200' }
-    } else if (isWaitlisted) {
-      return { status: 'waitlisted', icon: '⏳', label: 'Waitlisted', color: 'bg-yellow-50 border-yellow-200' }
-    } else if (reservedSpots.length > 0) {
-      return { status: 'reserved', icon: '👥', label: `Reserved: ${reservedSpots.length}`, color: 'bg-blue-50 border-blue-200', spots: reservedSpots }
-    }
-    return { status: 'unknown', icon: '○', label: 'Not joined', color: 'bg-gray-50 border-gray-200' }
-  }
-
-  if (userInvolvedEvents.length === 0) {
+  if (userJoinedEvents.length === 0) {
     return (
       <div className="bg-white rounded-lg border border-border p-8 text-center">
         <p className="text-lg text-muted mb-2">No upcoming events</p>
@@ -63,8 +48,7 @@ export function UpcomingEventsSection({ user, events, joinedEventIds = [], onEve
 
   return (
     <div className="space-y-4">
-      {userInvolvedEvents.map((event) => {
-        const eventStatus = getEventStatus(event)
+      {userJoinedEvents.map((event) => {
         const eventDate = new Date(`${event.date}T${event.time}`)
         const dateStr = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
         const timeStr = event.time
@@ -72,7 +56,7 @@ export function UpcomingEventsSection({ user, events, joinedEventIds = [], onEve
         return (
           <div
             key={event.id}
-            className={`bg-white rounded-lg border-2 ${eventStatus.color} p-4 hover:shadow-md transition cursor-pointer`}
+            className="bg-white rounded-lg border-2 border-green-200 bg-green-50 p-4 hover:shadow-md transition cursor-pointer"
             onClick={() => onEventDetails?.(event.id)}
           >
             {/* Event Header */}
@@ -80,43 +64,34 @@ export function UpcomingEventsSection({ user, events, joinedEventIds = [], onEve
               <div className="flex items-start gap-3 flex-1">
                 <span className="text-3xl">{getSportEmoji(event.sportType)}</span>
                 <div className="flex-1">
-                  <h4 className="font-bold text-foreground text-lg">{event.title}</h4>
-                  <p className="text-sm text-muted">{event.location}</p>
+                  <h3 className="font-semibold text-foreground text-lg">{event.title}</h3>
+                  <p className="text-sm text-muted mt-1">{event.location}</p>
                 </div>
+              </div>
+              <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                <span>✅</span>
+                <span>Joined</span>
               </div>
             </div>
 
-            {/* Date and Time */}
-            <div className="mb-3 pb-3 border-b border-border/30">
-              <p className="text-sm font-semibold text-foreground">
-                📅 {dateStr} at {timeStr}
-              </p>
-            </div>
-
-            {/* Status Badge */}
-            <div className="mb-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-current/20">
-              <span className="text-base">{eventStatus.icon}</span>
-              <span className="text-xs font-semibold text-foreground">{eventStatus.label}</span>
-            </div>
-
-            {/* Reserved Spots */}
-            {eventStatus.spots && eventStatus.spots.length > 0 && (
-              <div className="mb-3 bg-blue-50 rounded-lg p-3 border border-blue-100">
-                <p className="text-xs font-semibold text-foreground mb-2">Reserved for:</p>
-                <div className="space-y-1">
-                  {eventStatus.spots.map((spot, idx) => (
-                    <p key={idx} className="text-xs text-muted ml-2">
-                      • {spot.name}
-                    </p>
-                  ))}
-                </div>
+            {/* Event Details */}
+            <div className="flex flex-wrap gap-4 mt-4 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📅</span>
+                <span className="text-foreground font-medium">{dateStr}</span>
               </div>
-            )}
-
-            {/* Event Details Footer */}
-            <div className="flex items-center justify-between text-xs text-muted pt-2 border-t border-border/30">
-              <span className="capitalize">{event.skillLevel}</span>
-              <span>{event.currentParticipants}/{event.maxParticipants} spots</span>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🕐</span>
+                <span className="text-foreground font-medium">{timeStr}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">👥</span>
+                <span className="text-foreground font-medium">{event.currentParticipants}/{event.maxParticipants}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">📊</span>
+                <span className="text-foreground font-medium capitalize">{event.skillLevel}</span>
+              </div>
             </div>
           </div>
         )
