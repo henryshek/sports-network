@@ -35,6 +35,7 @@ export default function App() {
   const [selectedIndividualChatId, setSelectedIndividualChatId] = useState<string | null>(null)
   const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
   const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
+  const [joinedEventIds, setJoinedEventIds] = useState<string[]>([])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -104,22 +105,34 @@ export default function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentPage === 'home' && <Home user={user} onNavigate={(page) => {
-          if (page === 'events') setCurrentPage('events')
-          else if (page === 'clubs') setCurrentPage('clubs')
-          else if (page === 'map') setCurrentPage('map')
-          else if (page === 'messages') setCurrentPage('messages')
-          else if (page === 'profile') setCurrentPage('profile')
-          else if (page === 'trending') setCurrentPage('trending')
-          else if (page === 'saved') setCurrentPage('saved')
-          else if (page === 'nearby') setCurrentPage('nearby')
-          else if (page === 'create-event') setCurrentPage('create-event')
-        }} onEventDetails={navigateToEventDetail} />}
+        {currentPage === 'home' && (
+          <Home
+            user={user}
+            joinedEventIds={joinedEventIds}
+            onJoinEvent={(eventId) => setJoinedEventIds([...joinedEventIds, eventId])}
+            onLeaveEvent={(eventId) => setJoinedEventIds(joinedEventIds.filter(id => id !== eventId))}
+            onNavigate={(page) => {
+              if (page === 'events') setCurrentPage('events')
+              else if (page === 'clubs') setCurrentPage('clubs')
+              else if (page === 'map') setCurrentPage('map')
+              else if (page === 'messages') setCurrentPage('messages')
+              else if (page === 'profile') setCurrentPage('profile')
+              else if (page === 'trending') setCurrentPage('trending')
+              else if (page === 'saved') setCurrentPage('saved')
+              else if (page === 'nearby') setCurrentPage('nearby')
+              else if (page === 'create-event') setCurrentPage('create-event')
+            }}
+            onEventDetails={navigateToEventDetail}
+          />
+        )}
         {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} onEventManagement={() => setCurrentPage('event-management')} />}
         {currentPage === 'event-detail' && selectedEventId && (
           <EventDetail
             eventId={selectedEventId}
             user={user}
+            joinedEventIds={joinedEventIds}
+            onJoinEvent={(eventId) => setJoinedEventIds([...joinedEventIds, eventId])}
+            onLeaveEvent={(eventId) => setJoinedEventIds(joinedEventIds.filter(id => id !== eventId))}
             onBack={() => setCurrentPage('events')}
             onEventUpdate={(updatedEvent) => {
               setEvents(events.map(e => e.id === updatedEvent.id ? updatedEvent : e))

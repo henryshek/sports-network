@@ -6,15 +6,18 @@ import { UpcomingEventsSection } from '@/components/UpcomingEventsSection'
 
 interface HomeProps {
   user: User
+  joinedEventIds: string[]
+  onJoinEvent: (eventId: string) => void
+  onLeaveEvent: (eventId: string) => void
   onNavigate?: (page: string) => void
   onEventDetails?: (eventId: string) => void
 }
 
-export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
+export default function Home({ user, joinedEventIds, onJoinEvent, onLeaveEvent, onNavigate, onEventDetails }: HomeProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [twoWeekDates, setTwoWeekDates] = useState<Date[]>([])
   const [selectedDateEvents, setSelectedDateEvents] = useState<Event[]>([])
-  const [joinedEventIds, setJoinedEventIds] = useState<string[]>([])
+
   const calendarRef = useRef<HTMLDivElement>(null)
 
   // Initialize 2-week dates
@@ -251,9 +254,9 @@ export default function Home({ user, onNavigate, onEventDetails }: HomeProps) {
                       <button
                         onClick={() => {
                           if (joinedEventIds.includes(event.id)) {
-                            setJoinedEventIds(joinedEventIds.filter(id => id !== event.id))
+                            onLeaveEvent(event.id)
                           } else {
-                            setJoinedEventIds([...joinedEventIds, event.id])
+                            onJoinEvent(event.id)
                           }
                         }}
                         className={`px-4 py-2 text-sm rounded-lg transition font-semibold ${

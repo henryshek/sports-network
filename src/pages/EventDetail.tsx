@@ -6,6 +6,9 @@ interface EventDetailProps {
   eventId: string
   onBack: () => void
   user?: { id: string; name: string }
+  joinedEventIds: string[]
+  onJoinEvent: (eventId: string) => void
+  onLeaveEvent: (eventId: string) => void
   onEventUpdate?: (event: Event) => void
   onMessageOrganizer?: (organizerId: string, organizerName: string) => void
 }
@@ -21,7 +24,7 @@ interface UserProfile {
   joinedDate: string
 }
 
-export default function EventDetail({ eventId, onBack, user, onEventUpdate, onMessageOrganizer }: EventDetailProps) {
+export default function EventDetail({ eventId, onBack, user, onJoinEvent, onLeaveEvent, onEventUpdate, onMessageOrganizer }: EventDetailProps) {
   const [event, setEvent] = useState<Event | null>(null)
   const [isJoined, setIsJoined] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
@@ -62,6 +65,7 @@ export default function EventDetail({ eventId, onBack, user, onEventUpdate, onMe
       setEvent(updatedEvent)
       setIsJoined(false)
       onEventUpdate?.(updatedEvent)
+      onLeaveEvent(eventId)
     } else if (isFull) {
       const updatedEvent = {
         ...event,
@@ -69,6 +73,7 @@ export default function EventDetail({ eventId, onBack, user, onEventUpdate, onMe
       }
       setEvent(updatedEvent)
       onEventUpdate?.(updatedEvent)
+      onJoinEvent(eventId)
       alert('Added to waitlist!')
     } else {
       const updatedEvent = {
@@ -79,6 +84,7 @@ export default function EventDetail({ eventId, onBack, user, onEventUpdate, onMe
       setEvent(updatedEvent)
       setIsJoined(true)
       onEventUpdate?.(updatedEvent)
+      onJoinEvent(eventId)
     }
   }
 
