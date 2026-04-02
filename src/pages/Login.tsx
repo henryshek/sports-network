@@ -7,6 +7,19 @@ interface LoginProps {
 
 // Mock users database
 const mockUsers: Record<string, { password: string; user: User }> = {
+  'demo@example.com': {
+    password: 'demo',
+    user: {
+      id: 'demo',
+      name: 'Demo User',
+      email: 'demo@example.com',
+      avatar: '👤',
+      bio: 'Demo user for testing',
+      sports: ['basketball', 'tennis', 'soccer'],
+      location: 'Hong Kong',
+      joinedDate: '2024-04-01',
+    },
+  },
   'john@example.com': {
     password: 'password123',
     user: {
