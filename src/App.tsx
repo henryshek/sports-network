@@ -35,7 +35,15 @@ export default function App() {
   const [selectedIndividualChatId, setSelectedIndividualChatId] = useState<string | null>(null)
   const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
   const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
-  const [joinedEventIds, setJoinedEventIds] = useState<string[]>([])
+  const [joinedEventIds, setJoinedEventIds] = useState<string[]>(() => {
+    const stored = localStorage.getItem('joinedEventIds')
+    return stored ? JSON.parse(stored) : []
+  })
+
+  // Persist joinedEventIds to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('joinedEventIds', JSON.stringify(joinedEventIds))
+  }, [joinedEventIds])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
