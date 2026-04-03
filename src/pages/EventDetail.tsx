@@ -24,7 +24,7 @@ interface UserProfile {
   joinedDate: string
 }
 
-export default function EventDetail({ eventId, onBack, user, onJoinEvent, onLeaveEvent, onEventUpdate, onMessageOrganizer }: EventDetailProps) {
+export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJoinEvent, onLeaveEvent, onEventUpdate, onMessageOrganizer }: EventDetailProps) {
   const [event, setEvent] = useState<Event | null>(null)
   const [isJoined, setIsJoined] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
@@ -39,6 +39,11 @@ export default function EventDetail({ eventId, onBack, user, onJoinEvent, onLeav
       setIsJoined(foundEvent.participants.includes(currentUserId))
     }
   }, [eventId])
+
+  // Sync isJoined state with joinedEventIds prop from parent
+  useEffect(() => {
+    setIsJoined(joinedEventIds.includes(eventId))
+  }, [joinedEventIds, eventId])
 
   if (!event) {
     return (
