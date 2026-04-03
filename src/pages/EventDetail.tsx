@@ -58,6 +58,9 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
 
   const handleJoinEvent = () => {
     if (isJoined) {
+      if (!confirm('Are you sure you want to leave this event?')) {
+        return
+      }
       const updatedEvent = {
         ...event,
         currentParticipants: event.currentParticipants - 1,
@@ -75,7 +78,6 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
       setEvent(updatedEvent)
       onEventUpdate?.(updatedEvent)
       onJoinEvent(eventId)
-      alert('Added to waitlist!')
     } else {
       const updatedEvent = {
         ...event,
@@ -107,7 +109,6 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
 
     setShowReserveModal(false)
     setReserveFor('')
-    alert('Spot reserved successfully!')
   }
 
   const handleCancelReserve = (participantId: string) => {
@@ -120,7 +121,7 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
           ? event.reservedGuests.filter(g => (typeof g === 'string' ? g : g.id) !== participantId)
           : [],
       })
-      alert('Reservation cancelled!')
+      // Reservation cancelled successfully
     }
   }
 
