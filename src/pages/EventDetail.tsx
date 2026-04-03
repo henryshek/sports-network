@@ -36,14 +36,10 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
     const foundEvent = mockEvents.find(e => e.id === eventId)
     if (foundEvent) {
       setEvent(foundEvent)
-      setIsJoined(foundEvent.participants.includes(currentUserId))
+      // Prioritize joinedEventIds from parent component over mockEvents data
+      setIsJoined(joinedEventIds.includes(eventId))
     }
-  }, [eventId])
-
-  // Sync isJoined state with joinedEventIds prop from parent
-  useEffect(() => {
-    setIsJoined(joinedEventIds.includes(eventId))
-  }, [joinedEventIds, eventId])
+  }, [eventId, joinedEventIds])
 
   if (!event) {
     return (
