@@ -195,7 +195,7 @@ export default function App() {
             selectedIndividualChatUserId={selectedIndividualChatUserId}
           />
         )}
-        {currentPage === 'profile' && <Profile user={user} onLogout={handleLogout} />}
+        {currentPage === 'profile' && <Profile user={user} onLogout={handleLogout} joinedEventIds={joinedEventIds} />}
         {currentPage === 'trending' && <Trending onEventDetails={navigateToEventDetail} onClubDetails={navigateToClubDetail} />}
         {currentPage === 'saved' && <Saved onEventDetails={navigateToEventDetail} onClubDetails={navigateToClubDetail} />}
         {currentPage === 'nearby' && <Nearby onEventDetails={navigateToEventDetail} onClubDetails={navigateToClubDetail} />}

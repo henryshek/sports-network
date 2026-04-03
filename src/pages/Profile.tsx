@@ -7,9 +7,10 @@ interface ProfileProps {
   user: User
   onLogout: () => void
   onSelectClub?: (clubId: string) => void
+  joinedEventIds?: string[]
 }
 
-export default function Profile({ user, onLogout, onSelectClub }: ProfileProps) {
+export default function Profile({ user, onLogout, onSelectClub, joinedEventIds = [] }: ProfileProps) {
   const [profilePicture, setProfilePicture] = useState<string>(user.profilePicture || '')
   const [previewImage, setPreviewImage] = useState<string | null>(null)
 
@@ -103,7 +104,7 @@ export default function Profile({ user, onLogout, onSelectClub }: ProfileProps) 
       {/* Stats */}
       <div className="grid md:grid-cols-3 gap-4 mb-8">
         {[
-          { icon: Trophy, label: 'Events Joined', value: user.totalActivitiesParticipated || '0' },
+          { icon: Trophy, label: 'Events Joined', value: joinedEventIds.length.toString() },
           { icon: Users, label: 'Clubs', value: (adminClubs.length + memberClubs.length).toString() },
           { icon: MapPin, label: 'Location', value: user.location || 'Not Set' }
         ].map((stat, i) => {
