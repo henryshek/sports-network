@@ -1,0 +1,148 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String
+  password      String
+  avatar        String?
+  bio           String?
+  location      String?
+  sports        String[]   @default([])
+  joinedDate    DateTime   @default(now())
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  createdEvents Event[]    @relation("EventOrganizer")
+  joinedEvents  Participant[]
+  clubs         ClubMember[]
+  sentMessages  Message[]
+  chats         ChatMember[]
+
+  @@map("users")
+}
+
+model Event {
+  id                    String     @id @default(cuid())
+  title                 String
+  description           String?
+  date                  String
+  time                  String
+  location              String
+  sportType             String
+  skillLevel            String     @default("intermediate")
+  maxParticipants       Int
+  currentParticipants   Int        @default(0)
+  organizerId           String
+  organizer             User       @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Cascade)
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  // Relations
+  participants          Participant[]
+  waitlist              Waitlist[]
+  chat                  Chat?      @relation("EventChat")
+
+  @@map("events")
+}
+
+model Participant {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt  DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@map("participants")
+}
+
+model Waitlist {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  addedAt   DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@map("waitlist")
+}
+
+model Club {
+  id            String     @id @default(cuid())
+  name          String
+  description   String?
+  icon          String?
+  sport         String
+  members       ClubMember[]
+  chat          Chat?      @relation("ClubChat")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("clubs")
+}
+
+model ClubMember {
+  id        String   @id @default(cuid())
+  clubId    String
+  club      Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   @default("member")
+  joinedAt  DateTime @default(now())
+
+  @@unique([clubId, userId])
+  @@map("club_members")
+}
+
+model Chat {
+  id              String     @id @default(cuid())
+  name            String?
+  type            String     @default("direct") // direct or group
+  eventId         String?    @unique
+  event           Event?     @relation("EventChat", fields: [eventId], references: [id], onDelete: Cascade)
+  clubId          String?    @unique
+  club            Club?      @relation("ClubChat", fields: [clubId], references: [id], onDelete: Cascade)
+  members         ChatMember[]
+  messages        Message[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@map("chats")
+}
+
+model ChatMember {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt  DateTime @default(now())
+
+  @@unique([chatId, userId])
+  @@map("chat_members")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@map("messages")
+}
