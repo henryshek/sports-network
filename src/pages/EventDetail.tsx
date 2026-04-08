@@ -54,23 +54,33 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
     )
   }
 
-  const isFull = event.currentParticipants >= event.maxParticipants
+  // Calculate actual capacity based on participants array length
+  const actualParticipantCount = event.participants.length
+  const isFull = actualParticipantCount >= event.maxParticipants
+  const waitlistCount = event.waitlist?.length || 0
 
   const handleJoinEvent = () => {
     if (isJoined) {
       if (!confirm('Are you sure you want to leave this event?')) {
         return
       }
+      // Leave event - decrement count and remove from participants
       const updatedEvent = {
         ...event,
-        currentParticipants: event.currentParticipants - 1,
+        currentParticipants: Math.max(0, actualParticipantCount - 1),
         participants: event.participants.filter(p => p !== currentUserId),
+        waitlist: event.waitlist?.filter(w => w !== currentUserId) || [],
       }
       setEvent(updatedEvent)
       setIsJoined(false)
       onEventUpdate?.(updatedEvent)
       onLeaveEvent(eventId)
     } else if (isFull) {
+      // Event is full - add to waitlist
+      if (event.waitlist?.includes(currentUserId)) {
+        alert('You are already on the waitlist')
+        return
+      }
       const updatedEvent = {
         ...event,
         waitlist: [...(event.waitlist || []), currentUserId],
@@ -79,10 +89,17 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
       onEventUpdate?.(updatedEvent)
       onJoinEvent(eventId)
     } else {
+      // Join event - increment count and add to participants
+      // Ensure no duplicates
+      if (event.participants.includes(currentUserId)) {
+        alert('You have already joined this event')
+        return
+      }
       const updatedEvent = {
         ...event,
-        currentParticipants: event.currentParticipants + 1,
+        currentParticipants: actualParticipantCount + 1,
         participants: [...event.participants, currentUserId],
+        waitlist: event.waitlist?.filter(w => w !== currentUserId) || [],
       }
       setEvent(updatedEvent)
       setIsJoined(true)
@@ -97,31 +114,48 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
       return
     }
 
-      const newReservedGuests = Array.isArray(event.reservedGuests)
-        ? [...event.reservedGuests, { name: reserveFor, id: reserveFor }]
-        : [{ name: reserveFor, id: reserveFor }]
-      setEvent({
-        ...event,
-        currentParticipants: event.currentParticipants + 1,
-        participants: [...event.participants, reserveFor],
-        reservedGuests: newReservedGuests,
-      })
+    // Check if already reserved
+    if (event.reservedGuests?.some(g => g.name === reserveFor)) {
+      alert('Already reserved for this person')
+      return
+    }
 
+    // Check capacity including reserved guests
+    const totalReserved = (event.reservedGuests?.length || 0)
+    if (actualParticipantCount + totalReserved >= event.maxParticipants) {
+      alert('Event is at full capacity')
+      return
+    }
+
+    const newReservedGuests = Array.isArray(event.reservedGuests)
+      ? [...event.reservedGuests, { name: reserveFor, id: reserveFor, status: 'approved' as const, reservedBy: currentUserId }]
+      : [{ name: reserveFor, id: reserveFor, status: 'approved' as const, reservedBy: currentUserId }]
+    
+    const updatedEvent = {
+      ...event,
+      currentParticipants: actualParticipantCount + 1,
+      participants: [...event.participants, reserveFor],
+      reservedGuests: newReservedGuests,
+    }
+    
+    setEvent(updatedEvent)
+    onEventUpdate?.(updatedEvent)
     setShowReserveModal(false)
     setReserveFor('')
   }
 
   const handleCancelReserve = (participantId: string) => {
     if (confirm('Are you sure you want to cancel this reservation?')) {
-      setEvent({
+      const updatedEvent = {
         ...event,
-        currentParticipants: Math.max(0, event.currentParticipants - 1),
+        currentParticipants: Math.max(0, actualParticipantCount - 1),
         participants: event.participants.filter(p => p !== participantId),
         reservedGuests: Array.isArray(event.reservedGuests)
           ? event.reservedGuests.filter(g => (typeof g === 'string' ? g : g.id) !== participantId)
           : [],
-      })
-      // Reservation cancelled successfully
+      }
+      setEvent(updatedEvent)
+      onEventUpdate?.(updatedEvent)
     }
   }
 
@@ -186,7 +220,7 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
             </div>
             <div>
               <p className="text-sm text-muted">👥 Participants</p>
-              <p className="text-lg font-semibold text-foreground">{event.currentParticipants}/{event.maxParticipants}</p>
+              <p className="text-lg font-semibold text-foreground">{actualParticipantCount}/{event.maxParticipants}</p>
             </div>
             <div>
               <p className="text-sm text-muted">⭐ Skill Level</p>
@@ -199,17 +233,20 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
             <div className="flex justify-between items-center mb-2">
               <p className="text-sm text-muted">Capacity</p>
               <p className="text-sm font-medium text-foreground">
-                {event.currentParticipants}/{event.maxParticipants}
+                {actualParticipantCount}/{event.maxParticipants}
               </p>
             </div>
             <div className="w-full bg-border rounded-full h-3">
               <div
                 className={`h-3 rounded-full transition ${
-                  event.currentParticipants >= event.maxParticipants ? 'bg-error' : 'bg-success'
+                  actualParticipantCount >= event.maxParticipants ? 'bg-error' : 'bg-success'
                 }`}
-                style={{ width: `${Math.min((event.currentParticipants / event.maxParticipants) * 100, 100)}%` }}
+                style={{ width: `${Math.min((actualParticipantCount / event.maxParticipants) * 100, 100)}%` }}
               />
             </div>
+            {waitlistCount > 0 && (
+              <p className="text-sm text-muted mt-2">📋 {waitlistCount} people on waitlist</p>
+            )}
           </div>
 
           {/* Action Buttons */}
@@ -269,7 +306,7 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
 
       {/* Participants */}
       <div className="bg-white rounded-lg border border-border p-6 mb-6">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Participants ({event.participants.length})</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-4">Participants ({actualParticipantCount})</h2>
         <div className="space-y-3">
           {event.participants.slice(0, 5).map((participantId, i) => {
             const participant = mockUsers[participantId as keyof typeof mockUsers]
@@ -281,16 +318,18 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
-                    {participant?.avatar || '👤'}
+                    {participant?.avatar || participantId[0].toUpperCase()}
                   </div>
-                  <p className="font-medium text-foreground">{participant?.name || 'User'}</p>
+                  <div className="text-left">
+                    <p className="font-semibold text-foreground">{participant?.name || participantId}</p>
+                    <p className="text-xs text-muted">{participant?.location || 'Location unknown'}</p>
+                  </div>
                 </div>
-                <span className="text-sm text-muted">View →</span>
               </button>
             )
           })}
           {event.participants.length > 5 && (
-            <p className="text-muted text-sm">+{event.participants.length - 5} more participants</p>
+            <p className="text-sm text-muted text-center py-2">+{event.participants.length - 5} more participants</p>
           )}
         </div>
       </div>
@@ -298,29 +337,32 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
       {/* Reserved Guests */}
       {event.reservedGuests && event.reservedGuests.length > 0 && (
         <div className="bg-white rounded-lg border border-border p-6 mb-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Reserved Spots ({event.reservedGuests.length})</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Reserved Guests</h2>
           <div className="space-y-3">
-            {event.reservedGuests.map((guest, i) => {
-              const guestId = typeof guest === 'string' ? guest : guest.id
-              const guestName = typeof guest === 'string' ? 'User' : guest.name
-              const user = mockUsers[guestId as keyof typeof mockUsers]
-              return (
-                <div key={i} className="flex items-center justify-between p-3 bg-surface rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-warning text-white flex items-center justify-center text-xs font-bold">
-                      {user?.avatar || '🎫'}
-                    </div>
-                    <p className="text-sm text-foreground">{user?.name || guestName}</p>
+            {event.reservedGuests.map((guest, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-3 bg-surface rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">
+                    {(typeof guest === 'string' ? guest : guest.name)[0].toUpperCase()}
                   </div>
-                  <button
-                    onClick={() => handleCancelReserve(guestId || '')}
-                    className="text-xs px-3 py-1 bg-error text-white rounded hover:opacity-90 transition"
-                  >
-                    Cancel
-                  </button>
+                  <div className="text-left">
+                    <p className="font-semibold text-foreground">{typeof guest === 'string' ? guest : guest.name}</p>
+                    <p className="text-xs text-muted">Reserved by {typeof guest === 'string' ? 'organizer' : (guest.reservedBy || 'organizer')}</p>
+                  </div>
                 </div>
-              )
-            })}
+                {currentUserId === event.organizerId && (
+                  <button
+                    onClick={() => handleCancelReserve(typeof guest === 'string' ? guest : guest.id || guest.name)}
+                    className="text-error hover:opacity-70 transition"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -329,92 +371,28 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
       {event.waitlist && event.waitlist.length > 0 && (
         <div className="bg-white rounded-lg border border-border p-6 mb-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Waitlist ({event.waitlist.length})</h2>
-          <div className="space-y-2">
-            {event.waitlist.map((userId, i) => {
-              const user = mockUsers[userId as keyof typeof mockUsers]
+          <div className="space-y-3">
+            {event.waitlist.slice(0, 5).map((waitlistedId, i) => {
+              const waitlistedUser = mockUsers[waitlistedId as keyof typeof mockUsers]
               return (
-                <div key={i} className="flex items-center gap-2 p-2 bg-surface rounded">
-                  <span className="text-sm text-muted">#{i + 1}</span>
-                  <p className="text-sm text-foreground">{user?.name || 'User'}</p>
-                </div>
+                <button
+                  key={i}
+                  onClick={() => handleViewProfile(waitlistedId)}
+                  className="w-full flex items-center gap-3 p-3 bg-surface rounded-lg hover:bg-border transition"
+                >
+                  <div className="w-10 h-10 rounded-full bg-warning text-white flex items-center justify-center text-sm font-bold">
+                    {waitlistedUser?.avatar || waitlistedId[0].toUpperCase()}
+                  </div>
+                  <div className="text-left">
+                    <p className="font-semibold text-foreground">{waitlistedUser?.name || waitlistedId}</p>
+                    <p className="text-xs text-muted">Waiting for spot</p>
+                  </div>
+                </button>
               )
             })}
-          </div>
-        </div>
-      )}
-
-      {/* User Profile Modal */}
-      {selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-foreground">User Profile</h2>
-              <button
-                onClick={() => setSelectedUser(null)}
-                className="text-2xl text-muted hover:text-foreground"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Avatar */}
-              <div className="flex justify-center">
-                <div className="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center text-4xl font-bold">
-                  {selectedUser.avatar}
-                </div>
-              </div>
-
-              {/* Name */}
-              <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">{selectedUser.name}</p>
-                <p className="text-sm text-muted">{selectedUser.email}</p>
-              </div>
-
-              {/* Bio */}
-              {selectedUser.bio && (
-                <div>
-                  <p className="text-sm text-muted">Bio</p>
-                  <p className="text-foreground">{selectedUser.bio}</p>
-                </div>
-              )}
-
-              {/* Sports */}
-              {selectedUser.sports && selectedUser.sports.length > 0 && (
-                <div>
-                  <p className="text-sm text-muted">Sports</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedUser.sports.map(sport => (
-                      <span key={sport} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm capitalize">
-                        {sport}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Location */}
-              {selectedUser.location && (
-                <div>
-                  <p className="text-sm text-muted">📍 Location</p>
-                  <p className="text-foreground">{selectedUser.location}</p>
-                </div>
-              )}
-
-              {/* Joined Date */}
-              <div>
-                <p className="text-sm text-muted">Joined</p>
-                <p className="text-foreground">{new Date(selectedUser.joinedDate).toLocaleDateString()}</p>
-              </div>
-
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedUser(null)}
-                className="w-full mt-6 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition"
-              >
-                Close
-              </button>
-            </div>
+            {event.waitlist.length > 5 && (
+              <p className="text-sm text-muted text-center py-2">+{event.waitlist.length - 5} more on waitlist</p>
+            )}
           </div>
         </div>
       )}
@@ -422,45 +400,64 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
       {/* Reserve Spot Modal */}
       {showReserveModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-8">
-            <h2 className="text-2xl font-bold text-foreground mb-6">Reserve a Spot</h2>
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Reserve Spot</h2>
+            <p className="text-muted mb-4">Reserve a spot for a friend or guest</p>
+            <input
+              type="text"
+              placeholder="Enter name"
+              value={reserveFor}
+              onChange={(e) => setReserveFor(e.target.value)}
+              className="w-full px-4 py-2 border border-border rounded-lg mb-4 focus:outline-none focus:border-primary"
+            />
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  setShowReserveModal(false)
+                  setReserveFor('')
+                }}
+                className="flex-1 px-4 py-2 border border-border rounded-lg text-foreground hover:bg-surface transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReserveSpot}
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition"
+              >
+                Reserve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-            <div className="space-y-4">
-              <p className="text-muted">Select a friend to reserve a spot for:</p>
-
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {Object.entries(mockUsers)
-                  .filter(([id]) => id !== 'user1')
-                  .map(([userId, user]) => (
-                    <button
-                      key={userId}
-                      onClick={() => setReserveFor(userId)}
-                      className={`w-full text-left p-3 rounded-lg border-2 transition ${
-                        reserveFor === userId
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary'
-                      }`}
-                    >
-                      <p className="font-medium text-foreground">{user.name}</p>
-                      <p className="text-sm text-muted">{user.sports?.join(', ') || 'Athlete'}</p>
-                    </button>
+      {/* User Profile Modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <button
+              onClick={() => setSelectedUser(null)}
+              className="text-muted hover:text-foreground mb-4"
+            >
+              ✕ Close
+            </button>
+            <div className="text-center">
+              <div className="w-24 h-24 rounded-full bg-primary text-white flex items-center justify-center text-4xl font-bold mx-auto mb-4">
+                {selectedUser.avatar || selectedUser.name[0]}
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-2">{selectedUser.name}</h3>
+              <p className="text-muted mb-4">{selectedUser.email}</p>
+              <p className="text-foreground mb-2">{selectedUser.bio}</p>
+              <p className="text-sm text-muted mb-4">📍 {selectedUser.location}</p>
+              {selectedUser.sports.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {selectedUser.sports.map(sport => (
+                    <span key={sport} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                      {sport}
+                    </span>
                   ))}
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <button
-                  onClick={() => setShowReserveModal(false)}
-                  className="flex-1 px-4 py-2 border border-border rounded-lg text-foreground hover:bg-surface transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleReserveSpot}
-                  className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition"
-                >
-                  Reserve
-                </button>
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

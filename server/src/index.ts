@@ -270,7 +270,10 @@ app.post('/api/events/:id/join', authMiddleware, async (req: AuthRequest, res: R
     const userId = req.userId!
 
     // Check if event exists
-    const event = await prisma.event.findUnique({ where: { id } })
+    const event = await prisma.event.findUnique({ 
+      where: { id },
+      include: { participants: true }
+    })
     if (!event) {
       return res.status(404).json({ error: 'Event not found' })
     }
@@ -289,15 +292,18 @@ app.post('/api/events/:id/join', authMiddleware, async (req: AuthRequest, res: R
       return res.status(400).json({ error: 'Already joined this event' })
     }
 
+    // Get actual participant count
+    const actualCount = event.participants.length
+
     // Check capacity
-    if (event.currentParticipants >= event.maxParticipants) {
+    if (actualCount >= event.maxParticipants) {
       // Add to waitlist
       await prisma.waitlist.create({
         data: {
           eventId: id,
           userId,
         },
-      })
+      }).catch(() => {}) // Ignore if already on waitlist
       return res.json({ message: 'Added to waitlist', waitlisted: true })
     }
 
@@ -309,12 +315,24 @@ app.post('/api/events/:id/join', authMiddleware, async (req: AuthRequest, res: R
       },
     })
 
-    // Update event participant count
-    await prisma.event.update({
+    // Update event participant count to match actual
+    const updatedEvent = await prisma.event.update({
       where: { id },
       data: {
-        currentParticipants: {
-          increment: 1,
+        currentParticipants: actualCount + 1,
+      },
+      include: {
+        organizer: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        participants: {
+          select: {
+            userId: true,
+          },
         },
       },
     })
@@ -333,7 +351,13 @@ app.post('/api/events/:id/join', authMiddleware, async (req: AuthRequest, res: R
       }).catch(() => {}) // Ignore if already member
     }
 
-    res.json({ message: 'Joined event', participant })
+    res.json({ 
+      message: 'Joined event', 
+      event: {
+        ...updatedEvent,
+        participants: updatedEvent.participants.map(p => p.userId),
+      }
+    })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Failed to join event' })
@@ -345,6 +369,16 @@ app.post('/api/events/:id/leave', authMiddleware, async (req: AuthRequest, res: 
     const { id } = req.params
     const userId = req.userId!
 
+    // Get event with current participants
+    const event = await prisma.event.findUnique({
+      where: { id },
+      include: { participants: true, waitlist: true }
+    })
+
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' })
+    }
+
     // Remove participant
     await prisma.participant.delete({
       where: {
@@ -353,17 +387,60 @@ app.post('/api/events/:id/leave', authMiddleware, async (req: AuthRequest, res: 
           userId,
         },
       },
+    }).catch(() => {
+      throw new Error('Not a participant')
     })
 
+    // Get actual participant count after removal
+    const actualCount = event.participants.length - 1
+
     // Update event participant count
-    await prisma.event.update({
+    const updatedEvent = await prisma.event.update({
       where: { id },
       data: {
-        currentParticipants: {
-          decrement: 1,
+        currentParticipants: actualCount,
+      },
+      include: {
+        organizer: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        participants: {
+          select: {
+            userId: true,
+          },
         },
       },
     })
+
+    // If there's someone on waitlist and now there's space, auto-promote first person
+    if (event.waitlist.length > 0 && actualCount < event.maxParticipants) {
+      const firstWaitlisted = event.waitlist[0]
+      
+      // Remove from waitlist
+      await prisma.waitlist.delete({
+        where: { id: firstWaitlisted.id },
+      })
+
+      // Add as participant
+      await prisma.participant.create({
+        data: {
+          eventId: id,
+          userId: firstWaitlisted.userId,
+        },
+      })
+
+      // Update count
+      await prisma.event.update({
+        where: { id },
+        data: {
+          currentParticipants: actualCount + 1,
+        },
+      })
+    }
 
     // Remove from event chat
     const chat = await prisma.chat.findFirst({
@@ -379,7 +456,13 @@ app.post('/api/events/:id/leave', authMiddleware, async (req: AuthRequest, res: 
       })
     }
 
-    res.json({ message: 'Left event' })
+    res.json({ 
+      message: 'Left event',
+      event: {
+        ...updatedEvent,
+        participants: updatedEvent.participants.map(p => p.userId),
+      }
+    })
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Failed to leave event' })
