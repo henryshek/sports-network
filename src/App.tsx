@@ -36,10 +36,8 @@ export default function App() {
   const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
   const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
   
-  // Suppress unused variable warnings - these are used for future chat features
-  void setSelectedIndividualChatId
-  void setSelectedIndividualChatName
-  void setSelectedIndividualChatUserId
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  void setSelectedClubChatId, setSelectedClubChatName, setSelectedIndividualChatId, setSelectedIndividualChatName, setSelectedIndividualChatUserId
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>(() => {
     const stored = localStorage.getItem('joinedEventIds')
     return stored ? JSON.parse(stored) : []
