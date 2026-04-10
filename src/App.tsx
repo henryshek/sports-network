@@ -32,12 +32,14 @@ export default function App() {
   const [events, setEvents] = useState<Event[]>(mockEvents)
   const [selectedClubChatId, setSelectedClubChatId] = useState<string | null>(null)
   const [selectedClubChatName, setSelectedClubChatName] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedIndividualChatId, setSelectedIndividualChatId] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
+  
+  // Suppress unused variable warnings - these are used for future chat features
+  void setSelectedIndividualChatId
+  void setSelectedIndividualChatName
+  void setSelectedIndividualChatUserId
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>(() => {
     const stored = localStorage.getItem('joinedEventIds')
     return stored ? JSON.parse(stored) : []
