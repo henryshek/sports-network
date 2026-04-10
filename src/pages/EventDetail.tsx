@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockEvents } from '../mockData';
+import { mockEvents, mockUsers } from '../mockData';
 import { Event } from '../types';
 import { useEffect, useState } from 'react';
 
@@ -42,10 +42,7 @@ export default function EventDetail({
       const updatedEvent = {
         ...event,
         currentParticipants: event.currentParticipants + 1,
-        participants: [
-          ...event.participants,
-          { id: 'user_' + Date.now(), name: 'You', location: 'Your Location' },
-        ],
+        participants: [...event.participants, 'demo'],
       };
       setEvent(updatedEvent);
       onEventUpdate(updatedEvent);
@@ -61,7 +58,7 @@ export default function EventDetail({
       const updatedEvent = {
         ...event,
         currentParticipants: Math.max(0, event.currentParticipants - 1),
-        participants: event.participants.slice(0, -1),
+        participants: event.participants.filter((p) => p !== 'demo'),
       };
       setEvent(updatedEvent);
       onEventUpdate(updatedEvent);
@@ -208,17 +205,20 @@ export default function EventDetail({
             Participants ({event.participants.length})
           </h3>
           <div className="space-y-3">
-            {event.participants.slice(0, 5).map((participant) => (
-              <div key={participant.id} className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 font-semibold">
-                  {participant.name.charAt(0)}
+            {event.participants.slice(0, 5).map((participantId) => {
+              const user = mockUsers[participantId];
+              return (
+                <div key={participantId} className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 font-semibold">
+                    {user?.name.charAt(0) || '?'}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground">{user?.name || 'Unknown'}</div>
+                    <div className="text-xs text-muted">{user?.location || 'Unknown'}</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-semibold text-foreground">{participant.name}</div>
-                  <div className="text-xs text-muted">{participant.location}</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
             {event.participants.length > 5 && (
               <div className="text-sm text-muted">+{event.participants.length - 5} more participants</div>
             )}
@@ -232,17 +232,20 @@ export default function EventDetail({
               Waitlist ({event.waitlist.length})
             </h3>
             <div className="space-y-3">
-              {event.waitlist.map((person) => (
-                <div key={person.id} className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
-                  <div className="w-10 h-10 bg-orange-200 rounded-full flex items-center justify-center text-orange-700 font-semibold">
-                    {person.name.charAt(0)}
+              {event.waitlist.map((personId) => {
+                const user = mockUsers[personId];
+                return (
+                  <div key={personId} className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                    <div className="w-10 h-10 bg-orange-200 rounded-full flex items-center justify-center text-orange-700 font-semibold">
+                      {user?.name.charAt(0) || '?'}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-foreground">{user?.name || 'Unknown'}</div>
+                      <div className="text-xs text-orange-600">Waiting for spot</div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-foreground">{person.name}</div>
-                    <div className="text-xs text-orange-600">Waiting for spot</div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
