@@ -300,24 +300,14 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
             <p className="text-muted mb-6">Are you sure you want to leave this event?</p>
             <div className="flex gap-3">
               <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleLeaveEvent();
-                }}
-                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition cursor-pointer"
+                onClick={() => handleLeaveEvent()}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition"
               >
                 Leave
               </button>
               <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setShowConfirmModal(false);
-                }}
-                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-foreground rounded-lg font-semibold transition cursor-pointer"
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-foreground rounded-lg font-semibold transition"
               >
                 Cancel
               </button>
