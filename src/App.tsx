@@ -32,8 +32,11 @@ export default function App() {
   const [events, setEvents] = useState<Event[]>(mockEvents)
   const [selectedClubChatId, setSelectedClubChatId] = useState<string | null>(null)
   const [selectedClubChatName, setSelectedClubChatName] = useState<string | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedIndividualChatId, setSelectedIndividualChatId] = useState<string | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>(() => {
     const stored = localStorage.getItem('joinedEventIds')
