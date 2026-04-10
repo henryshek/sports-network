@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { mockEvents, mockUsers } from '@/mockData'
-import { Event } from '@/types'
+import { mockEvents, mockUsers } from '../mockData'
+import { Event } from '../types'
 
 interface EventDetailProps {
   eventId: string
   onBack: () => void
-  user?: { id: string; name: string }
+  user?: any
   joinedEventIds: string[]
   onJoinEvent: (eventId: string) => void
   onLeaveEvent: (eventId: string) => void
@@ -16,57 +16,31 @@ interface EventDetailProps {
 export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJoinEvent, onLeaveEvent, onEventUpdate, onMessageOrganizer }: EventDetailProps) {
   const [event, setEvent] = useState<Event | null>(null)
   const [isJoined, setIsJoined] = useState(false)
-  // const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
-  const [showReserveModal, setShowReserveModal] = useState(false)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showReserveModal, setShowReserveModal] = useState(false)
   const [reserveFor, setReserveFor] = useState('')
   const currentUserId = user?.id || 'user1'
 
+  // Load event data
   useEffect(() => {
     const foundEvent = mockEvents.find(e => e.id === eventId)
     if (foundEvent) {
       setEvent(foundEvent)
-      // Prioritize joinedEventIds from parent component over mockEvents data
       setIsJoined(joinedEventIds.includes(eventId))
     }
   }, [eventId, joinedEventIds])
 
   if (!event) {
-    return (
-      <div className="pb-24">
-        <button onClick={onBack} className="text-primary hover:underline mb-4">
-          ← Back
-        </button>
-        <div className="text-center py-12">
-          <p className="text-muted">Event not found</p>
-        </div>
-      </div>
-    )
+    return <div className="text-center py-8">Loading event...</div>
   }
 
-  // Calculate actual capacity based on participants array length
   const actualParticipantCount = event.participants.length
-  const isFull = actualParticipantCount >= event.maxParticipants
   const waitlistCount = event.waitlist?.length || 0
-
-  const handleLeaveConfirm = () => {
-    // Leave event - decrement count and remove from participants
-    const updatedEvent = {
-      ...event,
-      currentParticipants: Math.max(0, actualParticipantCount - 1),
-      participants: event.participants.filter(p => p !== currentUserId),
-      waitlist: event.waitlist?.filter(w => w !== currentUserId) || [],
-    }
-    setEvent(updatedEvent)
-    setIsJoined(false)
-    onEventUpdate?.(updatedEvent)
-    onLeaveEvent(eventId)
-    setShowConfirmModal(false)
-  }
+  const isFull = actualParticipantCount >= event.maxParticipants
 
   const handleJoinEvent = () => {
     if (isJoined) {
-      // Show confirmation modal instead of browser confirm
+      // Show confirmation modal to leave
       setShowConfirmModal(true)
     } else if (isFull) {
       // Event is full - add to waitlist
@@ -84,7 +58,6 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
       setIsJoined(true)
     } else {
       // Join event - increment count and add to participants
-      // Ensure no duplicates
       if (event.participants.includes(currentUserId)) {
         alert('You have already joined this event')
         return
@@ -102,53 +75,48 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
     }
   }
 
-  const handleReserveSpot = () => {
-    if (!reserveFor) {
-      alert('Please select a friend to reserve for')
+  const handleLeaveEvent = () => {
+    if (!event.participants.includes(currentUserId)) {
+      alert('You are not a participant of this event')
       return
     }
 
-    // Check if already reserved
-    if (event.reservedGuests?.some(g => g.name === reserveFor)) {
-      alert('Already reserved for this person')
-      return
-    }
-
-    // Check capacity including reserved guests
-    const totalReserved = (event.reservedGuests?.length || 0)
-    if (actualParticipantCount + totalReserved >= event.maxParticipants) {
-      alert('Event is at full capacity')
-      return
-    }
-
-    const newReservedGuests = Array.isArray(event.reservedGuests)
-      ? [...event.reservedGuests, { name: reserveFor, id: reserveFor, status: 'approved' as const, reservedBy: currentUserId }]
-      : [{ name: reserveFor, id: reserveFor, status: 'approved' as const, reservedBy: currentUserId }]
-    
     const updatedEvent = {
       ...event,
-      currentParticipants: actualParticipantCount + 1,
-      participants: [...event.participants, reserveFor],
-      reservedGuests: newReservedGuests,
+      currentParticipants: Math.max(0, actualParticipantCount - 1),
+      participants: event.participants.filter(p => p !== currentUserId),
     }
-    
     setEvent(updatedEvent)
+    setIsJoined(false)
     onEventUpdate?.(updatedEvent)
-    setShowReserveModal(false)
-    setReserveFor('')
+    onLeaveEvent(eventId)
+    setShowConfirmModal(false)
   }
 
-  const handleCancelReserve = (participantId: string) => {
-    if (confirm('Are you sure you want to cancel this reservation?')) {
-      const updatedEvent = {
-        ...event,
-        currentParticipants: Math.max(0, actualParticipantCount - 1),
-        participants: event.participants.filter(p => p !== participantId),
-        reservedGuests: event.reservedGuests?.filter(g => g.id !== participantId) || [],
-      }
-      setEvent(updatedEvent)
-      onEventUpdate?.(updatedEvent)
+  const handleReserveSpot = () => {
+    if (!reserveFor) {
+      alert('Please enter a name to reserve for')
+      return
     }
+
+    const updatedEvent = {
+      ...event,
+      reservedGuests: [...(event.reservedGuests || []), { name: reserveFor, reservedBy: currentUserId }],
+    }
+    setEvent(updatedEvent)
+    onEventUpdate?.(updatedEvent)
+    setReserveFor('')
+    setShowReserveModal(false)
+    alert(`Reserved a spot for ${reserveFor}!`)
+  }
+
+  const handleCancelReserve = (guestName: string) => {
+    const updatedEvent = {
+      ...event,
+      reservedGuests: event.reservedGuests?.filter(g => g.name !== guestName) || [],
+    }
+    setEvent(updatedEvent)
+    onEventUpdate?.(updatedEvent)
   }
 
   const handleMessageOrganizer = () => {
@@ -158,11 +126,8 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
     }
   }
 
-  const capacityPercentage = (actualParticipantCount / event.maxParticipants) * 100
-
   return (
-    <div className="pb-24">
-      {/* Back Button */}
+    <div className="max-w-2xl mx-auto">
       <button onClick={onBack} className="text-primary hover:underline mb-4">
         ← Back to Events
       </button>
@@ -192,46 +157,45 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
         </div>
         <div>
           <div className="text-sm text-muted">⭐ Skill Level</div>
-          <div className="font-semibold">{event.skillLevel}</div>
+          <div className="font-semibold capitalize">{event.skillLevel}</div>
         </div>
       </div>
 
       {/* Capacity Bar */}
       <div className="mb-6">
-        <div className="text-sm text-muted">Capacity</div>
+        <div className="text-sm text-muted mb-2">Capacity</div>
         <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
           <div
             className="bg-green-500 h-full transition-all duration-300"
-            style={{ width: `${Math.min(capacityPercentage, 100)}%` }}
-          />
+            style={{ width: `${Math.min((actualParticipantCount / event.maxParticipants) * 100, 100)}%` }}
+          ></div>
         </div>
-        <div className="flex justify-between mt-2">
-          <span className="text-sm text-muted">{actualParticipantCount} people on waitlist</span>
-          <span className="text-sm font-semibold">{actualParticipantCount}/{event.maxParticipants}</span>
+        <div className="text-xs text-muted mt-1">
+          {actualParticipantCount} people {waitlistCount > 0 && `• ${waitlistCount} on waitlist`}
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 mb-6 flex-wrap">
+      <div className="flex gap-3 mb-6">
         <button
           onClick={handleJoinEvent}
           className={`px-6 py-3 rounded-lg font-semibold transition ${
             isJoined
-              ? 'bg-red-500 text-white hover:bg-red-600'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
+              ? 'bg-red-500 hover:bg-red-600 text-white'
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
           }`}
         >
           {isJoined ? 'Leave Event' : 'Join Event'}
         </button>
         <button
           onClick={() => setShowReserveModal(true)}
-          className="px-6 py-3 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition"
+          className="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold transition"
         >
           🎫 Reserve Spot
         </button>
         <button
           onClick={handleMessageOrganizer}
-          className="px-6 py-3 bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-600 transition"
+          className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold transition"
         >
           💬 Message Organizer
         </button>
@@ -263,14 +227,16 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
                   {participant?.name.charAt(0)}
                 </div>
                 <div>
-                  <div className="font-semibold">{participant?.name}</div>
-                  <div className="text-sm text-muted">{participant?.location}</div>
+                  <div className="font-semibold text-sm">{participant?.name}</div>
+                  <div className="text-xs text-muted">{participant?.location}</div>
                 </div>
               </div>
             )
           })}
           {actualParticipantCount > 5 && (
-            <div className="text-sm text-muted pt-2">+{actualParticipantCount - 5} more participants</div>
+            <div className="text-sm text-muted font-semibold pt-2">
+              +{actualParticipantCount - 5} more participants
+            </div>
           )}
         </div>
       </div>
@@ -288,8 +254,8 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
                     {waitlistUser?.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="font-semibold">{waitlistUser?.name}</div>
-                    <div className="text-sm text-muted">Waiting for spot</div>
+                    <div className="font-semibold text-sm">{waitlistUser?.name}</div>
+                    <div className="text-xs text-orange-600">Waiting for spot</div>
                   </div>
                 </div>
               )
@@ -304,18 +270,18 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
           <h3 className="text-lg font-semibold mb-4">Reserved Guests ({event.reservedGuests.length})</h3>
           <div className="space-y-3">
             {event.reservedGuests.map((guest) => (
-              <div key={guest.id} className="flex items-center justify-between">
+              <div key={guest.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
                     {guest.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="font-semibold">{guest.name}</div>
-                    <div className="text-sm text-muted">Reserved by {Object.values(mockUsers).find(u => u.id === guest.reservedBy)?.name}</div>
+                    <div className="font-semibold text-sm">{guest.name}</div>
+                    <div className="text-xs text-muted">Reserved by {Object.values(mockUsers).find(u => u.id === guest.reservedBy)?.name}</div>
                   </div>
                 </div>
                 <button
-                  onClick={() => handleCancelReserve(guest.id || guest.name)}
+                  onClick={() => handleCancelReserve(guest.name)}
                   className="text-red-500 hover:text-red-700 text-sm font-semibold"
                 >
                   Cancel
@@ -326,31 +292,22 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
         </div>
       )}
 
-      {/* Reserve Spot Modal */}
-      {showReserveModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Reserve Spot For</h3>
-            <input
-              type="text"
-              placeholder="Friend's name"
-              value={reserveFor}
-              onChange={(e) => setReserveFor(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
-            />
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold mb-2">Leave Event?</h3>
+            <p className="text-muted mb-6">Are you sure you want to leave this event?</p>
             <div className="flex gap-3">
               <button
-                onClick={handleReserveSpot}
-                className="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600"
+                onClick={handleLeaveEvent}
+                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition"
               >
-                Reserve
+                Leave
               </button>
               <button
-                onClick={() => {
-                  setShowReserveModal(false)
-                  setReserveFor('')
-                }}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-400"
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-foreground rounded-lg font-semibold transition"
               >
                 Cancel
               </button>
@@ -359,22 +316,29 @@ export default function EventDetail({ eventId, onBack, user, joinedEventIds, onJ
         </div>
       )}
 
-      {/* Leave Confirmation Modal */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Leave Event?</h3>
-            <p className="text-muted mb-6">Are you sure you want to leave this event?</p>
+      {/* Reserve Spot Modal */}
+      {showReserveModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold mb-2">Reserve a Spot</h3>
+            <p className="text-muted mb-4">Enter the name of the person you want to reserve for:</p>
+            <input
+              type="text"
+              value={reserveFor}
+              onChange={(e) => setReserveFor(e.target.value)}
+              placeholder="Friend's name"
+              className="w-full px-4 py-2 border border-border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-primary"
+            />
             <div className="flex gap-3">
               <button
-                onClick={handleLeaveConfirm}
-                className="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600"
+                onClick={handleReserveSpot}
+                className="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-semibold transition"
               >
-                Leave
+                Reserve
               </button>
               <button
-                onClick={() => setShowConfirmModal(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-400"
+                onClick={() => setShowReserveModal(false)}
+                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-foreground rounded-lg font-semibold transition"
               >
                 Cancel
               </button>
