@@ -66,7 +66,6 @@ export default function EventDetail({
   };
 
   const capacityPercentage = (event.currentParticipants / event.maxParticipants) * 100;
-  const spotsRemaining = event.maxParticipants - event.currentParticipants;
   const waitlistCount = event.waitlist ? event.waitlist.length : 0;
 
   return (
@@ -85,7 +84,7 @@ export default function EventDetail({
       <div className="p-4 space-y-6">
         {/* Event Header */}
         <div className="bg-blue-100 rounded-lg p-8 text-center">
-          <div className="text-5xl">{event.icon}</div>
+          <div className="text-5xl">🎯</div>
         </div>
 
         {/* Event Title */}

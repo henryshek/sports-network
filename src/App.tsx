@@ -153,7 +153,7 @@ export default function App() {
             onEventUpdate={(updatedEvent) => {
               setEvents(events.map(e => e.id === updatedEvent.id ? updatedEvent : e))
             }}
-            onMessageOrganizer={(organizerId, organizerName) => {
+            onMessageOrganizer={(organizerId: string, organizerName: string) => {
               // Create or open chat with organizer
               console.log('onMessageOrganizer called:', organizerId, organizerName)
               setSelectedIndividualChatId(`chat_${organizerId}`)
