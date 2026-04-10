@@ -30,11 +30,11 @@ export default function App() {
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null)
   const [selectedClub, setSelectedClub] = useState<Club | null>(null)
   const [events, setEvents] = useState<Event[]>(mockEvents)
-  const [selectedClubChatId, setSelectedClubChatId] = useState<string | null>(null)
-  const [selectedClubChatName, setSelectedClubChatName] = useState<string | null>(null)
-  const [selectedIndividualChatId, setSelectedIndividualChatId] = useState<string | null>(null)
-  const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
-  const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
+  // const [selectedClubChatId, setSelectedClubChatId] = useState<string | null>(null)
+  // const [selectedClubChatName, setSelectedClubChatName] = useState<string | null>(null)
+  // const [selectedIndividualChatId, setSelectedIndividualChatId] = useState<string | null>(null)
+  // const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
+  // const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>(() => {
     const stored = localStorage.getItem('joinedEventIds')
     return stored ? JSON.parse(stored) : []
@@ -140,8 +140,6 @@ export default function App() {
         {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} onEventManagement={() => setCurrentPage('event-management')} />}
         {currentPage === 'event-detail' && selectedEventId && (
           <EventDetail
-            eventId={selectedEventId}
-            user={user}
             joinedEventIds={joinedEventIds}
             onJoinEvent={(eventId) => {
               if (!joinedEventIds.includes(eventId)) {
@@ -149,17 +147,8 @@ export default function App() {
               }
             }}
             onLeaveEvent={(eventId) => setJoinedEventIds(joinedEventIds.filter(id => id !== eventId))}
-            onBack={() => setCurrentPage('events')}
             onEventUpdate={(updatedEvent) => {
               setEvents(events.map(e => e.id === updatedEvent.id ? updatedEvent : e))
-            }}
-            onMessageOrganizer={(organizerId: string, organizerName: string) => {
-              // Create or open chat with organizer
-              console.log('onMessageOrganizer called:', organizerId, organizerName)
-              setSelectedIndividualChatId(`chat_${organizerId}`)
-              setSelectedIndividualChatName(organizerName)
-              setSelectedIndividualChatUserId(organizerId)
-              setCurrentPage('messages')
             }}
           />
         )}
