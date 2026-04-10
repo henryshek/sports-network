@@ -117,7 +117,11 @@ export default function App() {
           <Home
             user={user}
             joinedEventIds={joinedEventIds}
-            onJoinEvent={(eventId) => setJoinedEventIds([...joinedEventIds, eventId])}
+            onJoinEvent={(eventId) => {
+              if (!joinedEventIds.includes(eventId)) {
+                setJoinedEventIds([...joinedEventIds, eventId])
+              }
+            }}
             onLeaveEvent={(eventId) => setJoinedEventIds(joinedEventIds.filter(id => id !== eventId))}
             onNavigate={(page) => {
               if (page === 'events') setCurrentPage('events')
@@ -139,7 +143,11 @@ export default function App() {
             eventId={selectedEventId}
             user={user}
             joinedEventIds={joinedEventIds}
-            onJoinEvent={(eventId) => setJoinedEventIds([...joinedEventIds, eventId])}
+            onJoinEvent={(eventId) => {
+              if (!joinedEventIds.includes(eventId)) {
+                setJoinedEventIds([...joinedEventIds, eventId])
+              }
+            }}
             onLeaveEvent={(eventId) => setJoinedEventIds(joinedEventIds.filter(id => id !== eventId))}
             onBack={() => setCurrentPage('events')}
             onEventUpdate={(updatedEvent) => {
