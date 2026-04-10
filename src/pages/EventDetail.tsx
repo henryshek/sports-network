@@ -190,11 +190,11 @@ export default function EventDetail({
           <h3 className="text-lg font-semibold text-foreground mb-4">Organizer</h3>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-              {event.organizer.name.charAt(0)}
+              {event.organizer?.name.charAt(0) || '?'}
             </div>
             <div>
-              <div className="font-semibold text-foreground">{event.organizer.name}</div>
-              <div className="text-sm text-muted">{event.organizer.role}</div>
+              <div className="font-semibold text-foreground">{event.organizer?.name || 'Unknown'}</div>
+              <div className="text-sm text-muted">{event.organizer?.bio || 'Event Organizer'}</div>
             </div>
           </div>
         </div>
