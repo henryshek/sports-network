@@ -30,11 +30,11 @@ export default function App() {
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null)
   const [selectedClub, setSelectedClub] = useState<Club | null>(null)
   const [events, setEvents] = useState<Event[]>(mockEvents)
-  // const [selectedClubChatId, setSelectedClubChatId] = useState<string | null>(null)
-  // const [selectedClubChatName, setSelectedClubChatName] = useState<string | null>(null)
-  // const [selectedIndividualChatId, setSelectedIndividualChatId] = useState<string | null>(null)
-  // const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
-  // const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
+  const [selectedClubChatId, setSelectedClubChatId] = useState<string | null>(null)
+  const [selectedClubChatName, setSelectedClubChatName] = useState<string | null>(null)
+  const [selectedIndividualChatId, setSelectedIndividualChatId] = useState<string | null>(null)
+  const [selectedIndividualChatName, setSelectedIndividualChatName] = useState<string | null>(null)
+  const [selectedIndividualChatUserId, setSelectedIndividualChatUserId] = useState<string | null>(null)
   const [joinedEventIds, setJoinedEventIds] = useState<string[]>(() => {
     const stored = localStorage.getItem('joinedEventIds')
     return stored ? JSON.parse(stored) : []
