@@ -143,6 +143,7 @@ export default function App() {
         {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} onEventManagement={() => setCurrentPage('event-management')} />}
         {currentPage === 'event-detail' && selectedEventId && (
           <EventDetail
+            eventId={selectedEventId}
             joinedEventIds={joinedEventIds}
             onJoinEvent={(eventId) => {
               if (!joinedEventIds.includes(eventId)) {
@@ -153,6 +154,7 @@ export default function App() {
             onEventUpdate={(updatedEvent) => {
               setEvents(events.map(e => e.id === updatedEvent.id ? updatedEvent : e))
             }}
+            onBack={() => setCurrentPage('events')}
           />
         )}
         {currentPage === 'create-event' && (
