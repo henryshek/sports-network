@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { User, Event } from '@/types'
 import { Zap } from 'lucide-react'
-import { mockEvents } from '@/mockData'
 import { UpcomingEventsSection } from '@/components/UpcomingEventsSection'
 
 interface HomeProps {
   user: User
+  events: Event[]
   joinedEventIds: string[]
   onJoinEvent: (eventId: string) => void
   onLeaveEvent: (eventId: string) => void
@@ -13,7 +13,7 @@ interface HomeProps {
   onEventDetails?: (eventId: string) => void
 }
 
-export default function Home({ user, joinedEventIds, onJoinEvent, onLeaveEvent, onNavigate, onEventDetails }: HomeProps) {
+export default function Home({ user, events, joinedEventIds, onJoinEvent, onLeaveEvent, onNavigate, onEventDetails }: HomeProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [twoWeekDates, setTwoWeekDates] = useState<Date[]>([])
   const [selectedDateEvents, setSelectedDateEvents] = useState<Event[]>([])
@@ -46,7 +46,7 @@ export default function Home({ user, joinedEventIds, onJoinEvent, onLeaveEvent, 
 
   // Update events when selected date changes
   useEffect(() => {
-    const eventsForDate = mockEvents.filter(event => {
+    const eventsForDate = events.filter(event => {
       const eventDate = new Date(event.date)
       return (
         eventDate.getDate() === selectedDate.getDate() &&
@@ -57,7 +57,7 @@ export default function Home({ user, joinedEventIds, onJoinEvent, onLeaveEvent, 
     // Sort by time
     eventsForDate.sort((a, b) => a.time.localeCompare(b.time))
     setSelectedDateEvents(eventsForDate)
-  }, [selectedDate])
+  }, [selectedDate, events])
 
   const quickAccessItems = [
     { id: 'events', label: 'Events', icon: '📅', color: 'bg-blue-100 text-blue-600', description: 'Find & join events' },
@@ -127,7 +127,7 @@ export default function Home({ user, joinedEventIds, onJoinEvent, onLeaveEvent, 
         <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
           📅 Your Upcoming Events
         </h2>
-        <UpcomingEventsSection user={user} events={mockEvents} joinedEventIds={joinedEventIds} onEventDetails={onEventDetails} />
+        <UpcomingEventsSection user={user} events={events} joinedEventIds={joinedEventIds} onEventDetails={onEventDetails} />
       </div>
 
       {/* Quick Access Dashboard */}

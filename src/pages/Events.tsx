@@ -1,19 +1,18 @@
 import { useState } from 'react'
-import { mockEvents } from '@/mockData'
 import { Event } from '@/types'
 import { EventMiniMap } from '@/components/EventMiniMap'
 import { TOP_SPORTS, isTopSport } from '@/constants/sports'
 
 interface EventsProps {
+  events: Event[]
   onSelectEvent: (eventId: string) => void
   onCreateEvent?: () => void
   onEventManagement?: () => void
 }
 
-export default function Events({ onSelectEvent, onCreateEvent, onEventManagement }: EventsProps) {
+export default function Events({ events, onSelectEvent, onCreateEvent, onEventManagement }: EventsProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSport, setSelectedSport] = useState<string>('')
-  const [events] = useState<Event[]>(mockEvents)
 
   const topSports = TOP_SPORTS.map(s => s.toLowerCase())
 

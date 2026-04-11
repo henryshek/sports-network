@@ -119,6 +119,7 @@ export default function App() {
         {currentPage === 'home' && (
           <Home
             user={user}
+            events={events}
             joinedEventIds={joinedEventIds}
             onJoinEvent={(eventId) => {
               if (!joinedEventIds.includes(eventId)) {
@@ -140,7 +141,7 @@ export default function App() {
             onEventDetails={navigateToEventDetail}
           />
         )}
-        {currentPage === 'events' && <Events onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} onEventManagement={() => setCurrentPage('event-management')} />}
+        {currentPage === 'events' && <Events events={events} onSelectEvent={navigateToEventDetail} onCreateEvent={() => setCurrentPage('create-event')} onEventManagement={() => setCurrentPage('event-management')} />}
         {currentPage === 'event-detail' && selectedEventId && (
           <EventDetail
             eventId={selectedEventId}
